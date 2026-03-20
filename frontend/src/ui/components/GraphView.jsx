@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useCallback, useMemo, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
@@ -18,6 +18,13 @@ export default function GraphView({
   onReject,
 }) {
   const fgRef = useRef();
+
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg) return;
+    fg.d3Force('charge').strength(-600);
+    fg.d3Force('link').distance(180);
+  }, []);
 
   // react-force-graph mutates node objects in-place (adds x/y/vx/vy).
   // We pass it a stable shape derived from graphData so React state stays clean.
