@@ -286,6 +286,16 @@
   color: #ef4444;
 }
 
+/* ── Form label ──────────────────────────────────────────────────────────── */
+
+.sidebar__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* ── Edge list ───────────────────────────────────────────────────────────── */
 
 .edge-list {

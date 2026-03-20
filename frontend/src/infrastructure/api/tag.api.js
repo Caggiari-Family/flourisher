@@ -13,8 +13,9 @@ export function createTagApi(token) {
     fetchGraph: () => client.get('/graph'),
 
     // ── Nodes ────────────────────────────────────────────────────────────
-    createTag: (name, description) =>
-      client.post('/nodes', { name, description }),
+    /** @param {boolean} [suggested=false]  Pass true for AI suggestion nodes */
+    createTag: (name, description, suggested = false) =>
+      client.post('/nodes', { name, description, suggested }),
 
     updateTag: (id, data) => client.put(`/nodes/${id}`, data),
 
@@ -31,8 +32,5 @@ export function createTagApi(token) {
     updateEdge: (id, label) => client.put(`/edges/${id}`, { label }),
 
     deleteEdge: (id) => client.delete(`/edges/${id}`),
-
-    // ── LLM ──────────────────────────────────────────────────────────────
-    getSuggestions: (nodeIds) => client.post('/llm/suggest', { nodeIds }),
   };
 }

@@ -39,11 +39,6 @@ services:
       APP_PASSWORD:   "${APP_PASSWORD:-admin}"
       JWT_SECRET:     "${JWT_SECRET:-please-change-this-secret}"
 
-      LLM_PROVIDER:    "${LLM_PROVIDER:-anthropic}"
-      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
-      ANTHROPIC_MODEL:   "${ANTHROPIC_MODEL:-claude-haiku-4-5-20251001}"
-      OLLAMA_URL:        "${OLLAMA_URL:-http://ollama:11434}"
-      OLLAMA_MODEL:      "${OLLAMA_MODEL:-llama3}"
     depends_on:
       neo4j:
         condition: service_started

@@ -6,6 +6,7 @@ export class CreateTagCommand {
   constructor(
     public readonly name: string,
     public readonly description: string,
+    public readonly suggested: boolean = false,
   ) {}
 }
 
@@ -17,7 +18,7 @@ export class CreateTagUseCase {
     return this.tagRepo.createTag({
       name: cmd.name,
       description: cmd.description,
-      suggested: false,
+      suggested: cmd.suggested,
     });
   }
 }
