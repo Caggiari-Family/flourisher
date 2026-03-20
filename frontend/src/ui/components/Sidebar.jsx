@@ -3,6 +3,7 @@ import './Sidebar.css';
 
 export default function Sidebar({
   nodes,
+  edges,
   selectedIds,
   selectedNodes,
   suggestions,
@@ -11,6 +12,8 @@ export default function Sidebar({
   onRemoveTag,
   onToggleSelect,
   onClearSelection,
+  onLinkNodes,
+  onRemoveEdge,
   onRequestSuggestions,
   onAccept,
   onReject,
@@ -29,6 +32,7 @@ export default function Sidebar({
   };
 
   const permanentNodes = nodes.filter((n) => !n.suggested);
+  const canLink = selectedIds.size >= 2;
 
   return (
     <aside className="sidebar">
@@ -66,14 +70,14 @@ export default function Sidebar({
         </form>
       </section>
 
-      {/* ── AI Suggestions ────────────────────────── */}
+      {/* ── Selection actions ─────────────────────── */}
       <section className="sidebar__section">
-        <h2 className="sidebar__section-title">AI Suggestions</h2>
+        <h2 className="sidebar__section-title">Selection</h2>
 
         {selectedIds.size === 0 ? (
           <p className="sidebar__hint">
-            Click tags on the graph (or the list below) to select them, then ask
-            the AI for related concept suggestions.
+            Click tags in the graph or the list below to select them. With 2+
+            selected you can link them or ask the AI for suggestions.
           </p>
         ) : (
           <>
@@ -94,6 +98,14 @@ export default function Sidebar({
 
             <div className="sidebar__row">
               <button
+                className="btn btn--link"
+                onClick={onLinkNodes}
+                disabled={!canLink}
+                title={canLink ? 'Create edges between selected tags' : 'Select at least 2 tags'}
+              >
+                🔗 Link
+              </button>
+              <button
                 className="btn btn--ai"
                 onClick={onRequestSuggestions}
                 disabled={loading}
@@ -103,7 +115,7 @@ export default function Sidebar({
                     <span className="spinner" aria-hidden="true" /> Thinking…
                   </>
                 ) : (
-                  '✨ Get Suggestions'
+                  '✨ Suggest'
                 )}
               </button>
               <button
@@ -165,7 +177,7 @@ export default function Sidebar({
       {/* ── Tag list ──────────────────────────────── */}
       <section className="sidebar__section sidebar__section--flex">
         <h2 className="sidebar__section-title">
-          All Tags
+          Tags
           <span className="badge">{permanentNodes.length}</span>
         </h2>
 
@@ -185,7 +197,7 @@ export default function Sidebar({
               )}
               <button
                 className="node-item__delete"
-                title="Delete"
+                title="Delete tag"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemoveTag(n.id);
@@ -197,6 +209,37 @@ export default function Sidebar({
           ))}
         </ul>
       </section>
+
+      {/* ── Edge list ─────────────────────────────── */}
+      {edges && edges.length > 0 && (
+        <section className="sidebar__section">
+          <h2 className="sidebar__section-title">
+            Edges
+            <span className="badge">{edges.length}</span>
+          </h2>
+          <ul className="edge-list">
+            {edges.map((e) => {
+              const sourceNode = nodes.find((n) => n.id === e.source);
+              const targetNode = nodes.find((n) => n.id === e.target);
+              return (
+                <li key={e.id} className="edge-item">
+                  <span className="edge-item__label">
+                    {sourceNode?.name ?? '?'} → {targetNode?.name ?? '?'}
+                    {e.label ? ` (${e.label})` : ''}
+                  </span>
+                  <button
+                    className="node-item__delete"
+                    title="Delete edge"
+                    onClick={() => onRemoveEdge(e.id)}
+                  >
+                    ×
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </aside>
   );
 }

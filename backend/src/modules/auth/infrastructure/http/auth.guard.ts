@@ -7,6 +7,10 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
+/**
+ * Guards routes with JWT Bearer token authentication.
+ * Token is issued by POST /api/auth/login.
+ */
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwt: JwtService) {}
@@ -16,7 +20,7 @@ export class AuthGuard implements CanActivate {
     const token = this.extractBearerToken(request);
 
     if (!token) {
-      throw new UnauthorizedException('No bearer token provided');
+      throw new UnauthorizedException('No Bearer token provided');
     }
 
     try {

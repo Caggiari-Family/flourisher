@@ -10,6 +10,6 @@ export class RejectSuggestionUseCase {
   constructor(private readonly tagRepo: TagRepositoryPort) {}
 
   execute(cmd: RejectSuggestionCommand): Promise<void> {
-    return this.tagRepo.delete(cmd.id);
+    return this.tagRepo.deleteTag(cmd.id);
   }
 }

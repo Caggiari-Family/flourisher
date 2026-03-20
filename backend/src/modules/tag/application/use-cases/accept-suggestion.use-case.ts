@@ -11,6 +11,6 @@ export class AcceptSuggestionUseCase {
   constructor(private readonly tagRepo: TagRepositoryPort) {}
 
   execute(cmd: AcceptSuggestionCommand): Promise<Tag> {
-    return this.tagRepo.setSuggested(cmd.id, false);
+    return this.tagRepo.updateTag(cmd.id, { suggested: false });
   }
 }

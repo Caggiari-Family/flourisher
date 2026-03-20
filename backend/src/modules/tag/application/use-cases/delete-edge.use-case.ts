@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { TagRepositoryPort } from '../ports/tag-repository.port';
 
-export class DeleteTagCommand {
+export class DeleteEdgeCommand {
   constructor(public readonly id: string) {}
 }
 
 @Injectable()
-export class DeleteTagUseCase {
+export class DeleteEdgeUseCase {
   constructor(private readonly tagRepo: TagRepositoryPort) {}
 
-  execute(cmd: DeleteTagCommand): Promise<void> {
-    return this.tagRepo.deleteTag(cmd.id);
+  execute(cmd: DeleteEdgeCommand): Promise<void> {
+    return this.tagRepo.deleteEdge(cmd.id);
   }
 }

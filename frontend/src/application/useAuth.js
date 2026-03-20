@@ -4,8 +4,8 @@ import { loginRequest } from '../infrastructure/api/auth.api';
 const TOKEN_KEY = 'flourisher_token';
 
 /**
- * Application-layer hook that manages authentication state.
- * Persists the JWT token to localStorage so sessions survive page reloads.
+ * Application-layer hook that manages JWT authentication state.
+ * Persists the token to localStorage so sessions survive page reloads.
  */
 export function useAuth() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));

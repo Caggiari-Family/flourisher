@@ -15,6 +15,7 @@ export interface Edge {
   id: string;
   source: string;
   target: string;
+  label: string;
 }
 
 export interface Graph {

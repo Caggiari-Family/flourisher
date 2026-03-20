@@ -1,6 +1,8 @@
 const BASE = '/api';
 
 /**
+ * Authenticates against the backend and returns a JWT access token.
+ *
  * @param {string} username
  * @param {string} password
  * @returns {Promise<{ access_token: string }>}

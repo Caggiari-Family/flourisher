@@ -1,10 +1,10 @@
 const BASE = '/api';
 
 /**
- * Creates an HTTP client that attaches a Bearer token to every request.
+ * Creates an HTTP client that attaches a JWT Bearer token to every request.
  * On 401 it clears the stored token and reloads the page to force re-login.
  *
- * @param {string} token
+ * @param {string} token  JWT access token
  */
 export function createApiClient(token) {
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
@@ -37,6 +37,7 @@ export function createApiClient(token) {
   return {
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
+    put: (path, body) => request('PUT', path, body),
     delete: (path) => request('DELETE', path),
   };
 }

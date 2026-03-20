@@ -15,6 +15,8 @@ export default function GraphPage({ token, onLogout }) {
     removeTag,
     toggleSelect,
     clearSelection,
+    linkSelectedNodes,
+    removeEdge,
     requestSuggestions,
     acceptSuggestion,
     rejectSuggestion,
@@ -35,6 +37,7 @@ export default function GraphPage({ token, onLogout }) {
       <div className="page-body">
         <Sidebar
           nodes={graphData.nodes}
+          edges={graphData.edges}
           selectedIds={selectedIds}
           selectedNodes={selectedNodes}
           suggestions={suggestions}
@@ -43,6 +46,8 @@ export default function GraphPage({ token, onLogout }) {
           onRemoveTag={removeTag}
           onToggleSelect={toggleSelect}
           onClearSelection={clearSelection}
+          onLinkNodes={linkSelectedNodes}
+          onRemoveEdge={removeEdge}
           onRequestSuggestions={requestSuggestions}
           onAccept={acceptSuggestion}
           onReject={rejectSuggestion}

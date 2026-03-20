@@ -13,6 +13,10 @@ class LoginDto {
   password: string;
 }
 
+/**
+ * Issues a JWT token for the single configured user.
+ * Credentials are compared against APP_USERNAME / APP_PASSWORD env vars.
+ */
 @Controller('auth')
 export class AuthController {
   constructor(private readonly jwt: JwtService) {}

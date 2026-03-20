@@ -14,7 +14,7 @@ export class CreateTagUseCase {
   constructor(private readonly tagRepo: TagRepositoryPort) {}
 
   execute(cmd: CreateTagCommand): Promise<Tag> {
-    return this.tagRepo.create({
+    return this.tagRepo.createTag({
       name: cmd.name,
       description: cmd.description,
       suggested: false,

@@ -119,6 +119,7 @@
 
 .btn--primary { background: #4f46e5; color: #fff; width: 100%; }
 .btn--ai      { background: #6d28d9; color: #fff; flex: 1; }
+.btn--link    { background: #0f3460; color: #93c5fd; border: 1px solid #2563eb; padding: 8px 10px; }
 .btn--ghost   { background: #1e2235; color: #94a3b8; border: 1px solid #2d3148; padding: 8px 10px; }
 .btn--accept  { background: #14532d; color: #bbf7d0; border: 1px solid #22c55e; font-size: 0.78rem; padding: 5px 10px; }
 .btn--reject  { background: #7f1d1d; color: #fecaca; border: 1px solid #ef4444; font-size: 0.78rem; padding: 5px 10px; }
@@ -283,4 +284,30 @@
 
 .node-item__delete:hover {
   color: #ef4444;
+}
+
+/* ── Edge list ───────────────────────────────────────────────────────────── */
+
+.edge-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edge-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: #0f1117;
+  border: 1px solid #1e2235;
+  border-radius: 5px;
+}
+
+.edge-item__label {
+  font-size: 0.75rem;
+  color: #64748b;
+  flex: 1;
+  word-break: break-all;
 }

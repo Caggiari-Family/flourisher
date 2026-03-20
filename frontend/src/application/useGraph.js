@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { createTagApi } from '../infrastructure/api/tag.api';
 
 /**
- * Application-layer hook that manages the graph state and orchestrates
- * tag / suggestion operations through the API adapter.
+ * Application-layer hook that manages the graph state and orchestrates all
+ * tag / edge / suggestion operations through the API adapter.
  *
  * @param {string} token  JWT access token
  */
@@ -15,7 +15,7 @@ export function useGraph(token) {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  // ── helpers ───────────────────────────────────────────────────────────────
 
   const notify = useCallback((msg, type = 'info') => {
     setToast({ msg, type });
@@ -26,18 +26,16 @@ export function useGraph(token) {
     try {
       const data = await api.fetchGraph();
       setGraphData(data);
-    } catch (err) {
+    } catch {
       notify('Could not load graph — is the backend running?', 'error');
     }
   }, [api, notify]);
-
-  // ── initial load ─────────────────────────────────────────────────────────
 
   useEffect(() => {
     reload();
   }, [reload]);
 
-  // ── graph mutations ───────────────────────────────────────────────────────
+  // ── node operations ───────────────────────────────────────────────────────
 
   const addTag = useCallback(
     async (name, description) => {
@@ -80,6 +78,38 @@ export function useGraph(token) {
 
   const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
 
+  // ── edge operations ───────────────────────────────────────────────────────
+
+  const linkSelectedNodes = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length < 2) return;
+    try {
+      // Create edges between all selected pairs
+      for (let i = 0; i < ids.length - 1; i++) {
+        await api.createEdge(ids[i], ids[i + 1]);
+      }
+      await reload();
+      notify(`${ids.length - 1} edge(s) created`, 'success');
+    } catch {
+      notify('Failed to create edge(s)', 'error');
+    }
+  }, [api, selectedIds, reload, notify]);
+
+  const removeEdge = useCallback(
+    async (id) => {
+      try {
+        await api.deleteEdge(id);
+        await reload();
+        notify('Edge deleted', 'info');
+      } catch {
+        notify('Failed to delete edge', 'error');
+      }
+    },
+    [api, reload, notify],
+  );
+
+  // ── LLM suggestions ───────────────────────────────────────────────────────
+
   const requestSuggestions = useCallback(async () => {
     if (selectedIds.size === 0) return;
     setLoading(true);
@@ -120,7 +150,7 @@ export function useGraph(token) {
     [api, reload, notify],
   );
 
-  // ── derived data ──────────────────────────────────────────────────────────
+  // ── derived ───────────────────────────────────────────────────────────────
 
   const suggestions = graphData.nodes.filter((n) => n.suggested);
   const selectedNodes = graphData.nodes.filter((n) => selectedIds.has(n.id));
@@ -136,6 +166,8 @@ export function useGraph(token) {
     removeTag,
     toggleSelect,
     clearSelection,
+    linkSelectedNodes,
+    removeEdge,
     requestSuggestions,
     acceptSuggestion,
     rejectSuggestion,

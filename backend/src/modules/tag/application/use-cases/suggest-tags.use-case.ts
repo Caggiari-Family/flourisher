@@ -22,13 +22,13 @@ export class SuggestTagsUseCase {
 
     const created: Tag[] = [];
     for (const s of suggestions) {
-      const tag = await this.tagRepo.create({
+      const tag = await this.tagRepo.createTag({
         name: s.name,
         description: s.description,
         suggested: true,
       });
       for (const sourceId of cmd.sourceNodeIds) {
-        await this.tagRepo.createEdge({ sourceId, targetId: tag.id });
+        await this.tagRepo.createEdge({ sourceId, targetId: tag.id, label: 'suggests' });
       }
       created.push(tag);
     }
