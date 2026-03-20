@@ -111,34 +111,60 @@ export function useGraph(token, getEmbedding) {
   const requestSuggestions = useCallback(async () => {
     if (selectedIds.size === 0 || !getEmbedding) return;
 
-    const selected = graphData.nodes.filter((n) => selectedIds.has(n.id));
+    const selected   = graphData.nodes.filter((n) =>  selectedIds.has(n.id));
+    const candidates = graphData.nodes.filter((n) => !selectedIds.has(n.id));
+
+    if (candidates.length === 0) {
+      notify('Add more tags before searching for similar ones', 'info');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Gather embeddings for selected nodes (use stored ones when available,
-      // otherwise generate on the fly)
-      const vectors = await Promise.all(
-        selected.map(async (n) => {
+      const nodeText = (n) =>
+        `${n.name}${n.description ? ': ' + n.description : ''}`;
+
+      // Embed selected nodes (use stored vector when available)
+      const selectedVectors = await Promise.all(
+        selected.map((n) => n.embedding ?? getEmbedding(nodeText(n))),
+      );
+
+      // Mean of selected embeddings
+      const dim  = selectedVectors[0].length;
+      const mean = Array.from({ length: dim }, (_, i) =>
+        selectedVectors.reduce((sum, v) => sum + v[i], 0) / selectedVectors.length,
+      );
+
+      // Embed every candidate (use stored vector, or generate + save back)
+      const candidateVectors = await Promise.all(
+        candidates.map(async (n) => {
           if (n.embedding) return n.embedding;
-          const text = `${n.name}${n.description ? ': ' + n.description : ''}`;
-          return getEmbedding(text);
+          const emb = await getEmbedding(nodeText(n));
+          // Persist silently so future searches are faster
+          api.updateTag(n.id, { embedding: emb }).catch(() => {});
+          return emb;
         }),
       );
 
-      // Mean embedding
-      const dim = vectors[0].length;
-      const mean = Array.from({ length: dim }, (_, i) =>
-        vectors.reduce((sum, v) => sum + v[i], 0) / vectors.length,
-      );
+      // Cosine similarity
+      const cosine = (a, b) => {
+        let dot = 0, na = 0, nb = 0;
+        for (let i = 0; i < a.length; i++) {
+          dot += a[i] * b[i];
+          na  += a[i] * a[i];
+          nb  += b[i] * b[i];
+        }
+        return dot / (Math.sqrt(na) * Math.sqrt(nb));
+      };
 
-      // Find similar nodes, excluding those already selected
-      const similar = await api.findSimilar(mean, [...selectedIds]);
-      if (similar.length === 0) {
-        notify('No similar tags found — add more tags or try a different selection', 'info');
-        return;
-      }
+      const scored = candidates
+        .map((n, i) => ({ node: n, score: cosine(mean, candidateVectors[i]) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+        .map(({ node }) => node);
 
-      setSuggestions(similar);
-      notify(`${similar.length} similar tag(s) found`, 'success');
+      setSuggestions(scored);
+      notify(`${scored.length} similar tag(s) found`, 'success');
     } catch (err) {
       notify(`Suggestion failed: ${err.message}`, 'error');
     } finally {
