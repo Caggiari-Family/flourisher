@@ -3,16 +3,15 @@
 # hot module replacement without rebuilding the image.
 #
 # To use the production build instead, run:
-#   docker compose -f docker-compose.yml up
+#   docker compose -f docker-compose.yml up --build
 
 services:
   frontend:
-    build: null
-    image: node:20-alpine
-    working_dir: /app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     volumes:
       - ./frontend:/app
       - /app/node_modules        # keep container's node_modules isolated
-    command: sh -c "npm install && npm run dev"
     environment:
       VITE_API_URL: "http://backend:3001"
