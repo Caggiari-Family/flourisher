@@ -5,16 +5,17 @@ import { createTagApi } from '../infrastructure/api/tag.api';
  * Application-layer hook that manages the graph state and orchestrates all
  * tag / edge / suggestion operations.
  *
- * @param {string}   token           JWT access token
- * @param {Function} getSuggestions  (selectedTags) => Promise<{name,description}[]>
- *                                   Injected so this hook stays agnostic of the
- *                                   LLM provider (Ollama, future providers, etc.)
+ * @param {string}   token        JWT access token
+ * @param {Function} getEmbedding (text: string) => Promise<number[]>
+ *                                Injected so this hook stays agnostic of the
+ *                                embedding provider (Ollama, future providers…)
  */
-export function useGraph(token, getSuggestions) {
+export function useGraph(token, getEmbedding) {
   const api = useMemo(() => createTagApi(token), [token]);
 
   const [graphData, setGraphData]     = useState({ nodes: [], edges: [] });
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [suggestions, setSuggestions] = useState([]);  // similar existing Tag[]
   const [loading, setLoading]         = useState(false);
   const [toast, setToast]             = useState(null);
 
@@ -40,18 +41,28 @@ export function useGraph(token, getSuggestions) {
 
   const addTag = useCallback(async (name, description) => {
     try {
-      await api.createTag(name, description);
+      // Create the tag first so the user doesn't wait for embedding
+      const tag = await api.createTag(name, description);
+
+      // Embed in the background and persist — failure is non-fatal
+      if (getEmbedding) {
+        getEmbedding(`${name}${description ? ': ' + description : ''}`)
+          .then((embedding) => api.updateTag(tag.id, { embedding }))
+          .catch(() => { /* embedding optional */ });
+      }
+
       await reload();
       notify(`"${name}" added`, 'success');
     } catch {
       notify('Failed to add tag', 'error');
     }
-  }, [api, reload, notify]);
+  }, [api, getEmbedding, reload, notify]);
 
   const removeTag = useCallback(async (id) => {
     try {
       await api.deleteTag(id);
       setSelectedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
+      setSuggestions((prev) => prev.filter((s) => s.id !== id));
       await reload();
       notify('Tag deleted', 'info');
     } catch {
@@ -95,56 +106,70 @@ export function useGraph(token, getSuggestions) {
     }
   }, [api, reload, notify]);
 
-  // ── LLM suggestions (provider-agnostic) ──────────────────────────────────
+  // ── embedding-based suggestions ───────────────────────────────────────────
 
   const requestSuggestions = useCallback(async () => {
-    if (selectedIds.size === 0 || !getSuggestions) return;
+    if (selectedIds.size === 0 || !getEmbedding) return;
 
-    const selectedNodes = graphData.nodes.filter((n) => selectedIds.has(n.id));
+    const selected = graphData.nodes.filter((n) => selectedIds.has(n.id));
     setLoading(true);
     try {
-      const suggestions = await getSuggestions(selectedNodes);
+      // Gather embeddings for selected nodes (use stored ones when available,
+      // otherwise generate on the fly)
+      const vectors = await Promise.all(
+        selected.map(async (n) => {
+          if (n.embedding) return n.embedding;
+          const text = `${n.name}${n.description ? ': ' + n.description : ''}`;
+          return getEmbedding(text);
+        }),
+      );
 
-      // Persist suggestions as nodes + edges via the backend REST API
-      for (const s of suggestions) {
-        const tag = await api.createTag(s.name, s.description ?? '', true);
-        for (const sourceId of selectedIds) {
-          await api.createEdge(sourceId, tag.id, 'suggests');
-        }
+      // Mean embedding
+      const dim = vectors[0].length;
+      const mean = Array.from({ length: dim }, (_, i) =>
+        vectors.reduce((sum, v) => sum + v[i], 0) / vectors.length,
+      );
+
+      // Find similar nodes, excluding those already selected
+      const similar = await api.findSimilar(mean, [...selectedIds]);
+      if (similar.length === 0) {
+        notify('No similar tags found — add more tags or try a different selection', 'info');
+        return;
       }
 
-      await reload();
-      notify(`${suggestions.length} suggestion(s) added to graph`, 'success');
+      setSuggestions(similar);
+      notify(`${similar.length} similar tag(s) found`, 'success');
     } catch (err) {
       notify(`Suggestion failed: ${err.message}`, 'error');
     } finally {
       setLoading(false);
     }
-  }, [api, graphData.nodes, selectedIds, getSuggestions, reload, notify]);
+  }, [api, graphData.nodes, selectedIds, getEmbedding, notify]);
 
+  /**
+   * Accept a suggestion: create edges from every selected node to the
+   * suggested node, then remove it from the suggestions list.
+   */
   const acceptSuggestion = useCallback(async (id) => {
     try {
-      await api.acceptSuggestion(id);
+      for (const sourceId of selectedIds) {
+        await api.createEdge(sourceId, id, 'similar');
+      }
+      setSuggestions((prev) => prev.filter((s) => s.id !== id));
       await reload();
-      notify('Suggestion accepted!', 'success');
+      notify('Edge(s) created!', 'success');
     } catch {
       notify('Failed to accept suggestion', 'error');
     }
-  }, [api, reload, notify]);
+  }, [api, selectedIds, reload, notify]);
 
-  const rejectSuggestion = useCallback(async (id) => {
-    try {
-      await api.rejectSuggestion(id);
-      await reload();
-      notify('Suggestion rejected', 'info');
-    } catch {
-      notify('Failed to reject suggestion', 'error');
-    }
-  }, [api, reload, notify]);
+  /** Reject a suggestion: dismiss it locally, no backend call needed. */
+  const rejectSuggestion = useCallback((id) => {
+    setSuggestions((prev) => prev.filter((s) => s.id !== id));
+  }, []);
 
   // ── derived ───────────────────────────────────────────────────────────────
 
-  const suggestions   = graphData.nodes.filter((n) => n.suggested);
   const selectedNodes = graphData.nodes.filter((n) => selectedIds.has(n.id));
 
   return {

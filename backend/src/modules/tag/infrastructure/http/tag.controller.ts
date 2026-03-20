@@ -17,11 +17,13 @@ import { UpdateTagUseCase, UpdateTagCommand } from '../../application/use-cases/
 import { DeleteTagUseCase, DeleteTagCommand } from '../../application/use-cases/delete-tag.use-case';
 import { AcceptSuggestionUseCase, AcceptSuggestionCommand } from '../../application/use-cases/accept-suggestion.use-case';
 import { RejectSuggestionUseCase, RejectSuggestionCommand } from '../../application/use-cases/reject-suggestion.use-case';
+import { FindSimilarTagsUseCase, FindSimilarTagsCommand } from '../../application/use-cases/find-similar-tags.use-case';
 import { CreateEdgeUseCase, CreateEdgeCommand } from '../../application/use-cases/create-edge.use-case';
 import { UpdateEdgeUseCase, UpdateEdgeCommand } from '../../application/use-cases/update-edge.use-case';
 import { DeleteEdgeUseCase, DeleteEdgeCommand } from '../../application/use-cases/delete-edge.use-case';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
+import { FindSimilarDto } from './dto/find-similar.dto';
 import { CreateEdgeDto } from './dto/create-edge.dto';
 import { UpdateEdgeDto } from './dto/update-edge.dto';
 
@@ -35,6 +37,7 @@ export class TagController {
     private readonly deleteTag: DeleteTagUseCase,
     private readonly acceptSuggestionUc: AcceptSuggestionUseCase,
     private readonly rejectSuggestionUc: RejectSuggestionUseCase,
+    private readonly findSimilarTags: FindSimilarTagsUseCase,
     private readonly createEdge: CreateEdgeUseCase,
     private readonly updateEdge: UpdateEdgeUseCase,
     private readonly deleteEdge: DeleteEdgeUseCase,
@@ -57,7 +60,14 @@ export class TagController {
   @Post('nodes')
   createNode(@Body() dto: CreateTagDto) {
     return this.createTag.execute(
-      new CreateTagCommand(dto.name, dto.description ?? '', dto.suggested ?? false),
+      new CreateTagCommand(dto.name, dto.description ?? '', dto.suggested ?? false, dto.embedding),
+    );
+  }
+
+  @Post('nodes/similar')
+  findSimilar(@Body() dto: FindSimilarDto) {
+    return this.findSimilarTags.execute(
+      new FindSimilarTagsCommand(dto.embedding, dto.excludeIds ?? [], dto.limit ?? 5),
     );
   }
 

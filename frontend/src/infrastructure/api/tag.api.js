@@ -14,8 +14,11 @@ export function createTagApi(token) {
 
     // ── Nodes ────────────────────────────────────────────────────────────
     /** @param {boolean} [suggested=false]  Pass true for AI suggestion nodes */
-    createTag: (name, description, suggested = false) =>
-      client.post('/nodes', { name, description, suggested }),
+    createTag: (name, description, suggested = false, embedding = undefined) =>
+      client.post('/nodes', { name, description, suggested, embedding }),
+
+    findSimilar: (embedding, excludeIds = [], limit = 5) =>
+      client.post('/nodes/similar', { embedding, excludeIds, limit }),
 
     updateTag: (id, data) => client.put(`/nodes/${id}`, data),
 

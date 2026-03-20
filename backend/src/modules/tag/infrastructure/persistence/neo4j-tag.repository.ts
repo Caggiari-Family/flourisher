@@ -55,9 +55,16 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     try {
       const id = uuidv4();
       const result = await session.run(
-        `CREATE (n:Tag {id: $id, name: $name, description: $description, suggested: $suggested})
+        `CREATE (n:Tag {id: $id, name: $name, description: $description,
+                        suggested: $suggested, embedding: $embedding})
          RETURN n`,
-        { id, ...input },
+        {
+          id,
+          name: input.name,
+          description: input.description,
+          suggested: input.suggested,
+          embedding: input.embedding ?? null,
+        },
       );
       return this.toTag(result.records[0].get('n').properties);
     } finally {
@@ -88,6 +95,37 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     const session = this.neo4j.getSession();
     try {
       await session.run('MATCH (n:Tag {id: $id}) DETACH DELETE n', { id });
+    } finally {
+      await session.close();
+    }
+  }
+
+  // ── Semantic similarity ───────────────────────────────────────────────────
+
+  async findSimilar(
+    embedding: number[],
+    excludeIds: string[],
+    limit: number,
+  ): Promise<Tag[]> {
+    const session = this.neo4j.getSession();
+    try {
+      // Pure Cypher cosine similarity — no plugins required.
+      const result = await session.run(
+        `MATCH (n:Tag)
+         WHERE NOT n.id IN $excludeIds
+           AND n.embedding IS NOT NULL
+           AND size(n.embedding) = size($embedding)
+         WITH n,
+           reduce(dot = 0.0, i IN range(0, size(n.embedding) - 1) |
+             dot + n.embedding[i] * $embedding[i]) /
+           (sqrt(reduce(a = 0.0, x IN n.embedding | a + x * x)) *
+            sqrt(reduce(b = 0.0, x IN $embedding  | b + x * x))) AS similarity
+         ORDER BY similarity DESC
+         LIMIT $limit
+         RETURN n`,
+        { embedding, excludeIds, limit },
+      );
+      return result.records.map((r) => this.toTag(r.get('n').properties));
     } finally {
       await session.close();
     }
@@ -158,7 +196,13 @@ export class Neo4jTagRepository implements TagRepositoryPort {
   // ── Mappers ───────────────────────────────────────────────────────────────
 
   private toTag(p: Record<string, any>): Tag {
-    return new Tag(p.id, p.name, p.description ?? '', p.suggested === true);
+    return new Tag(
+      p.id,
+      p.name,
+      p.description ?? '',
+      p.suggested === true,
+      p.embedding ?? undefined,
+    );
   }
 
   private toEdge(r: any): Edge {

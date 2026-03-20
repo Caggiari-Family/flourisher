@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import './GraphPage.css';
 
 export default function GraphPage({ token, onLogout }) {
-  const { ollamaUrl, ollamaModel, saveOllamaUrl, saveOllamaModel, getSuggestions } =
+  const { ollamaUrl, ollamaModel, saveOllamaUrl, saveOllamaModel, getEmbedding } =
     useOllama();
 
   const {
@@ -24,7 +24,7 @@ export default function GraphPage({ token, onLogout }) {
     requestSuggestions,
     acceptSuggestion,
     rejectSuggestion,
-  } = useGraph(token, getSuggestions);
+  } = useGraph(token, getEmbedding);
 
   return (
     <div className="graph-page">

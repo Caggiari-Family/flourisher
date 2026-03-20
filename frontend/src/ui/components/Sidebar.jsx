@@ -86,7 +86,7 @@ export default function Sidebar({
         {selectedIds.size === 0 ? (
           <p className="sidebar__hint">
             Click tags on the graph or the list below to select them.
-            With 2+ selected you can link them or ask Ollama for suggestions.
+            With 2+ selected you can link them or find semantically similar tags via Ollama embeddings.
           </p>
         ) : (
           <>
@@ -116,7 +116,7 @@ export default function Sidebar({
       {suggestions.length > 0 && (
         <section className="sidebar__section">
           <h2 className="sidebar__section-title">
-            Pending <span className="badge">{suggestions.length}</span>
+            Similar <span className="badge">{suggestions.length}</span>
           </h2>
           <ul className="suggestion-list">
             {suggestions.map((s) => (
@@ -124,15 +124,15 @@ export default function Sidebar({
                 <div className="suggestion-item__name">{s.name}</div>
                 {s.description && <div className="suggestion-item__desc">{s.description}</div>}
                 <div className="suggestion-item__actions">
-                  <button className="btn btn--accept" onClick={() => onAccept(s.id)}>✓ Accept</button>
-                  <button className="btn btn--reject" onClick={() => onReject(s.id)}>✗ Reject</button>
+                  <button className="btn btn--accept" onClick={() => onAccept(s.id)}>⇢ Link</button>
+                  <button className="btn btn--reject" onClick={() => onReject(s.id)}>✗ Dismiss</button>
                 </div>
               </li>
             ))}
           </ul>
           <div className="sidebar__row sidebar__row--mt">
-            <button className="btn btn--accept btn--sm" onClick={() => suggestions.forEach((s) => onAccept(s.id))}>Accept all</button>
-            <button className="btn btn--reject btn--sm" onClick={() => suggestions.forEach((s) => onReject(s.id))}>Reject all</button>
+            <button className="btn btn--accept btn--sm" onClick={() => suggestions.forEach((s) => onAccept(s.id))}>Link all</button>
+            <button className="btn btn--reject btn--sm" onClick={() => suggestions.forEach((s) => onReject(s.id))}>Dismiss all</button>
           </div>
         </section>
       )}
@@ -189,18 +189,19 @@ export default function Sidebar({
         <h2 className="sidebar__section-title">Ollama</h2>
         <form className="add-form" onSubmit={handleOllamaSubmit}>
           <label className="sidebar__label">Server URL</label>
+
           <input
             className="sidebar__input"
             value={urlDraft}
             onChange={(e) => setUrlDraft(e.target.value)}
             placeholder="http://localhost:11434"
           />
-          <label className="sidebar__label">Model</label>
+          <label className="sidebar__label">Embedding model</label>
           <input
             className="sidebar__input"
             value={modelDraft}
             onChange={(e) => setModelDraft(e.target.value)}
-            placeholder="llama3"
+            placeholder="qwen3-embedding:0.6b"
           />
           <button className="btn btn--ghost btn--sm" type="submit">Save</button>
         </form>
