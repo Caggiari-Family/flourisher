@@ -121,7 +121,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
            (sqrt(reduce(a = 0.0, x IN n.embedding | a + x * x)) *
             sqrt(reduce(b = 0.0, x IN $embedding  | b + x * x))) AS similarity
          ORDER BY similarity DESC
-         LIMIT $limit
+         LIMIT toInteger($limit)
          RETURN n`,
         { embedding, excludeIds, limit },
       );
