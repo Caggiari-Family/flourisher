@@ -1,15 +1,15 @@
 import { useState, useCallback } from 'react';
-import { ollamaEmbed } from '../infrastructure/ollama/ollama.client';
+import { ollamaSuggest } from '../infrastructure/ollama/ollama.client';
 
 const URL_KEY   = 'flourisher_ollama_url';
 const MODEL_KEY = 'flourisher_ollama_model';
 
 const DEFAULT_URL   = 'http://localhost:11434';
-const DEFAULT_MODEL = 'qwen3-embedding:0.6b';
+const DEFAULT_MODEL = 'llama3';
 
 /**
  * Application-layer hook that manages Ollama configuration and exposes a
- * `getEmbedding` function for the graph layer to call.
+ * `getSuggestions` function for the graph layer to call.
  *
  * Settings are persisted to localStorage so they survive page reloads.
  */
@@ -31,9 +31,8 @@ export function useOllama() {
     setOllamaModel(model);
   }, []);
 
-  /** Embed a single text string via Ollama. Returns a number[]. */
-  const getEmbedding = useCallback(
-    (text) => ollamaEmbed(ollamaUrl, ollamaModel, text),
+  const getSuggestions = useCallback(
+    (selectedTags) => ollamaSuggest(ollamaUrl, ollamaModel, selectedTags),
     [ollamaUrl, ollamaModel],
   );
 
@@ -42,6 +41,6 @@ export function useOllama() {
     ollamaModel,
     saveOllamaUrl,
     saveOllamaModel,
-    getEmbedding,
+    getSuggestions,
   };
 }

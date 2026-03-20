@@ -4,11 +4,10 @@ export class Tag {
     public readonly name: string,
     public readonly description: string,
     public readonly suggested: boolean,
-    public readonly embedding?: number[],
   ) {}
 
   accept(): Tag {
-    return new Tag(this.id, this.name, this.description, false, this.embedding);
+    return new Tag(this.id, this.name, this.description, false);
   }
 }
 

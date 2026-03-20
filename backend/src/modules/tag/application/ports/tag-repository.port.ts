@@ -4,14 +4,12 @@ export interface CreateTagInput {
   name: string;
   description: string;
   suggested: boolean;
-  embedding?: number[];
 }
 
 export interface UpdateTagInput {
   name?: string;
   description?: string;
   suggested?: boolean;
-  embedding?: number[];
 }
 
 export interface CreateEdgeInput {
@@ -31,5 +29,4 @@ export abstract class TagRepositoryPort {
   abstract createEdge(input: CreateEdgeInput): Promise<Edge>;
   abstract updateEdge(id: string, label: string): Promise<Edge>;
   abstract deleteEdge(id: string): Promise<void>;
-  abstract findSimilar(embedding: number[], excludeIds: string[], limit: number): Promise<Tag[]>;
 }

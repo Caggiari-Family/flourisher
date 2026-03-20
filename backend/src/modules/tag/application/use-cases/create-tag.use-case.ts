@@ -7,7 +7,6 @@ export class CreateTagCommand {
     public readonly name: string,
     public readonly description: string,
     public readonly suggested: boolean = false,
-    public readonly embedding?: number[],
   ) {}
 }
 
@@ -20,7 +19,6 @@ export class CreateTagUseCase {
       name: cmd.name,
       description: cmd.description,
       suggested: cmd.suggested,
-      embedding: cmd.embedding,
     });
   }
 }
