@@ -35,8 +35,8 @@ export class TagController {
     private readonly createTag: CreateTagUseCase,
     private readonly updateTag: UpdateTagUseCase,
     private readonly deleteTag: DeleteTagUseCase,
-    private readonly acceptSuggestion: AcceptSuggestionUseCase,
-    private readonly rejectSuggestion: RejectSuggestionUseCase,
+    private readonly acceptSuggestionUc: AcceptSuggestionUseCase,
+    private readonly rejectSuggestionUc: RejectSuggestionUseCase,
     private readonly suggestTags: SuggestTagsUseCase,
     private readonly createEdge: CreateEdgeUseCase,
     private readonly updateEdge: UpdateEdgeUseCase,
@@ -78,13 +78,13 @@ export class TagController {
   // Suggestion lifecycle shortcuts
   @Put('nodes/:id/accept')
   acceptSuggestion(@Param('id') id: string) {
-    return this.acceptSuggestion.execute(new AcceptSuggestionCommand(id));
+    return this.acceptSuggestionUc.execute(new AcceptSuggestionCommand(id));
   }
 
   @Delete('nodes/:id/reject')
   @HttpCode(HttpStatus.NO_CONTENT)
   rejectSuggestion(@Param('id') id: string) {
-    return this.rejectSuggestion.execute(new RejectSuggestionCommand(id));
+    return this.rejectSuggestionUc.execute(new RejectSuggestionCommand(id));
   }
 
   // ── Edges ─────────────────────────────────────────────────────────────────
