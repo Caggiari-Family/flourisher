@@ -52,6 +52,14 @@ docker compose up --build
 
 The first start pulls the Neo4j image and waits for it to be ready — this can take ~30 seconds.
 
+The frontend runs as a **Vite dev server** with hot module replacement — edit a file and the browser updates instantly without rebuilding.
+
+To use the production nginx build instead:
+
+```bash
+docker compose -f docker-compose.yml up --build
+```
+
 **4. Open the app**
 
 ```
