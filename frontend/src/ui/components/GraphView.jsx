@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
+import { useRef, useCallback, useMemo, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
@@ -19,7 +19,7 @@ export default function GraphView({
 }) {
   const fgRef = useRef();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const fg = fgRef.current;
     if (!fg) return;
     fg.d3Force('charge').strength(-600);
@@ -121,7 +121,6 @@ export default function GraphView({
   return (
     <div className="graph-view">
       <ForceGraph2D
-        key={`${fgData.nodes.length}:${fgData.links.length}`}
         ref={fgRef}
         graphData={fgData}
         nodeCanvasObject={paintNode}
