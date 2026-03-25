@@ -100,7 +100,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     try {
       const result = await session.run(
         `MATCH (a:Tag)-[r:RELATED_TO]->(b:Tag)
-         RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label`,
+         RETURN coalesce(r.id, toString(elementId(r))) AS id, a.id AS source, b.id AS target, r.label AS label`,
       );
       return result.records.map((r) => this.toEdge(r));
     } finally {
