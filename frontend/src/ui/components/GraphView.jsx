@@ -37,11 +37,6 @@ export default function GraphView({
     [JSON.stringify(graphData)],
   );
 
-  // Imperatively sync data so deleted nodes/links are properly removed
-  useEffect(() => {
-    fgRef.current?.graphData(fgData);
-  }, [fgData]);
-
   const paintNode = useCallback(
     (node, ctx, globalScale) => {
       const isSelected = selectedIds.has(node.id);
@@ -127,6 +122,7 @@ export default function GraphView({
     <div className="graph-view">
       <ForceGraph2D
         ref={fgRef}
+        graphData={fgData}
         nodeCanvasObject={paintNode}
         nodeCanvasObjectMode={() => 'replace'}
         nodeRelSize={NODE_R}
