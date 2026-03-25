@@ -136,7 +136,8 @@ export default function GraphView({
         linkDirectionalArrowRelPos={1}
         linkDirectionalArrowColor={() => '#475569'}
         backgroundColor="#0f1117"
-        cooldownTicks={100}
+        warmupTicks={80}
+        cooldownTicks={150}
         d3AlphaDecay={0.015}
         d3VelocityDecay={0.25}
       />
