@@ -144,29 +144,31 @@ export function useGraph(token, getSuggestions, getFlourish) {
         nodes.filter((n) => !n.suggested).map((n) => [n.name.toLowerCase(), n.id]),
       );
 
-      // Create new suggested nodes for names not yet in the graph
+      // Keep only edges where at least one end is an existing node (no orphan clusters)
+      const validEdges = newEdges.filter((e) => {
+        const srcExisting = !!nameToId[e.source?.toLowerCase()];
+        const tgtExisting = !!nameToId[e.target?.toLowerCase()];
+        return srcExisting || tgtExisting;
+      });
+
+      // Create new suggested nodes for names that appear in valid edges
       const createdIds = { ...nameToId };
       const newNames = new Set(
-        newEdges.flatMap((e) => [e.source, e.target])
-          .filter((name) => !createdIds[name?.toLowerCase()]),
+        validEdges.flatMap((e) => [e.source, e.target])
+          .filter((name) => name && !createdIds[name.toLowerCase()]),
       );
 
       for (const name of newNames) {
-        if (!name) continue;
         const tag = await api.createTag(name, '', true);
         createdIds[name.toLowerCase()] = tag.id;
       }
 
-      // Create the suggested edges (only if at least one end is an existing permanent node)
+      // Create the valid edges
       let edgeCount = 0;
-      for (const e of newEdges) {
-        const srcKey = e.source?.toLowerCase();
-        const tgtKey = e.target?.toLowerCase();
-        const srcId = createdIds[srcKey];
-        const tgtId = createdIds[tgtKey];
-        const srcIsExisting = !!nameToId[srcKey];
-        const tgtIsExisting = !!nameToId[tgtKey];
-        if (srcId && tgtId && srcId !== tgtId && (srcIsExisting || tgtIsExisting)) {
+      for (const e of validEdges) {
+        const srcId = createdIds[e.source?.toLowerCase()];
+        const tgtId = createdIds[e.target?.toLowerCase()];
+        if (srcId && tgtId && srcId !== tgtId) {
           await api.createEdge(srcId, tgtId, 'flourish');
           edgeCount++;
         }
