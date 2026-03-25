@@ -144,11 +144,12 @@ export function useGraph(token, getSuggestions, getFlourish) {
         nodes.filter((n) => !n.suggested).map((n) => [n.name.toLowerCase(), n.id]),
       );
 
-      // Keep only edges where at least one end is an existing node (no orphan clusters)
+      // Keep only edges where exactly one end is new and the other is existing
+      // (no orphan clusters, and no redundant existing→existing edges)
       const validEdges = newEdges.filter((e) => {
         const srcExisting = !!nameToId[e.source?.toLowerCase()];
         const tgtExisting = !!nameToId[e.target?.toLowerCase()];
-        return srcExisting || tgtExisting;
+        return (srcExisting || tgtExisting) && !(srcExisting && tgtExisting);
       });
 
       // Create new suggested nodes for names that appear in valid edges
