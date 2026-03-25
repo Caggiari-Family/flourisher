@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import './GraphPage.css';
 
 export default function GraphPage({ token, onLogout }) {
-  const { ollamaUrl, ollamaModel, saveOllamaUrl, saveOllamaModel, getSuggestions } =
+  const { ollamaUrl, ollamaModel, language, saveOllamaUrl, saveOllamaModel, saveLanguage, getSuggestions } =
     useOllama();
 
   const {
@@ -33,9 +33,20 @@ export default function GraphPage({ token, onLogout }) {
           <span className="page-header-logo">🌱</span>
           <span className="page-header-title">Flourisher</span>
         </div>
-        <button className="page-header-logout" onClick={onLogout}>
-          Sign out
-        </button>
+        <div className="page-header-controls">
+          <select
+            className="page-header-lang"
+            value={language}
+            onChange={(e) => saveLanguage(e.target.value)}
+            title="Suggestion language"
+          >
+            <option value="en">EN</option>
+            <option value="fr">FR</option>
+          </select>
+          <button className="page-header-logout" onClick={onLogout}>
+            Sign out
+          </button>
+        </div>
       </header>
 
       <div className="page-body">
