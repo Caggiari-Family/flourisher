@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo, useEffect } from 'react';
+import { useRef, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
@@ -19,7 +19,7 @@ export default function GraphView({
 }) {
   const fgRef = useRef();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const fg = fgRef.current;
     if (!fg) return;
     fg.d3Force('charge').strength(-600);
@@ -136,8 +136,7 @@ export default function GraphView({
         linkDirectionalArrowRelPos={1}
         linkDirectionalArrowColor={() => '#475569'}
         backgroundColor="#0f1117"
-        warmupTicks={80}
-        cooldownTicks={150}
+        cooldownTicks={300}
         d3AlphaDecay={0.015}
         d3VelocityDecay={0.25}
       />
