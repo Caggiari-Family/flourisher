@@ -191,7 +191,6 @@ export default function Sidebar({
                 <button className="node-item__delete" title="Delete"
                   onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
               </div>
-              {n.description && <div className="node-item__desc">{n.description}</div>}
             </li>
           ))}
         </ul>

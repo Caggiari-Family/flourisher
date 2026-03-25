@@ -26,6 +26,11 @@ export default function GraphView({
     fg.d3Force('link').distance(180);
   }, []);
 
+  // Imperatively sync data so deleted nodes/links are properly removed
+  useEffect(() => {
+    fgRef.current?.graphData(fgData);
+  }, [fgData]);
+
   // react-force-graph mutates node objects in-place (adds x/y/vx/vy).
   // We pass it a stable shape derived from graphData so React state stays clean.
   const fgData = useMemo(
@@ -122,7 +127,6 @@ export default function GraphView({
     <div className="graph-view">
       <ForceGraph2D
         ref={fgRef}
-        graphData={fgData}
         nodeCanvasObject={paintNode}
         nodeCanvasObjectMode={() => 'replace'}
         nodeRelSize={NODE_R}
