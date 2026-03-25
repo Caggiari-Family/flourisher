@@ -157,12 +157,16 @@ export function useGraph(token, getSuggestions, getFlourish) {
         createdIds[name.toLowerCase()] = tag.id;
       }
 
-      // Create the suggested edges
+      // Create the suggested edges (only if at least one end is an existing permanent node)
       let edgeCount = 0;
       for (const e of newEdges) {
-        const srcId = createdIds[e.source?.toLowerCase()];
-        const tgtId = createdIds[e.target?.toLowerCase()];
-        if (srcId && tgtId && srcId !== tgtId) {
+        const srcKey = e.source?.toLowerCase();
+        const tgtKey = e.target?.toLowerCase();
+        const srcId = createdIds[srcKey];
+        const tgtId = createdIds[tgtKey];
+        const srcIsExisting = !!nameToId[srcKey];
+        const tgtIsExisting = !!nameToId[tgtKey];
+        if (srcId && tgtId && srcId !== tgtId && (srcIsExisting || tgtIsExisting)) {
           await api.createEdge(srcId, tgtId, 'flourish');
           edgeCount++;
         }

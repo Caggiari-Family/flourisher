@@ -170,6 +170,67 @@
 
 .chip__remove:hover { opacity: 1; }
 
+/* ── AI dropdown ─────────────────────────────────────────────────────────── */
+
+.ai-dropdown {
+  position: relative;
+  flex: 1;
+}
+
+.ai-dropdown .btn--ai {
+  width: 100%;
+}
+
+.ai-dropdown__caret {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+.ai-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1a1d2e;
+  border: 1px solid #6d28d9;
+  border-radius: 7px;
+  list-style: none;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.ai-dropdown__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  color: #e2e8f0;
+  font-size: 0.83rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.ai-dropdown__item:hover {
+  background: #252840;
+}
+
+.ai-dropdown__menu li + li {
+  border-top: 1px solid #2d3148;
+}
+
+.ai-dropdown__item-hint {
+  font-size: 0.7rem;
+  color: #475569;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
 /* ── Spinner ─────────────────────────────────────────────────────────────── */
 
 .spinner {

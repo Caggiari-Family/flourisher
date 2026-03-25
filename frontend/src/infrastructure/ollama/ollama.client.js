@@ -30,7 +30,8 @@ const FLOURISH_PROMPTS = {
   en: `You are a creative assistant that expands knowledge graphs.
 Given a graph of tags and their relationships, suggest new connections that would enrich it.
 Return ONLY a valid JSON array of edges: [{"source": "tag name", "target": "tag name"}].
-- source and target can be existing tags OR brand new tags not in the graph
+- IMPORTANT: every suggested edge must have at least one end that is an EXISTING tag in the graph — no orphan suggestions
+- source and/or target can also be brand new tags, but they must connect to something already in the graph
 - suggest 4-7 new connections
 - new tag names should be 1-3 words
 No markdown, no explanation — just the raw JSON array.
@@ -39,7 +40,8 @@ Example: [{"source":"painting","target":"color theory"},{"source":"perspective",
   fr: `Tu es un assistant créatif qui enrichit des graphes de connaissances.
 À partir d'un graphe de tags et de leurs relations, propose de nouvelles connexions pour l'enrichir.
 Réponds UNIQUEMENT avec un tableau JSON d'arêtes : [{"source": "nom du tag", "target": "nom du tag"}].
-- source et target peuvent être des tags existants OU de nouveaux tags absents du graphe
+- IMPORTANT : chaque arête proposée doit avoir au moins une extrémité qui est un tag EXISTANT dans le graphe — aucune suggestion orpheline
+- source et/ou target peuvent aussi être de nouveaux tags, mais ils doivent se connecter à quelque chose déjà dans le graphe
 - propose 4 à 7 nouvelles connexions
 - les nouveaux noms de tags doivent faire 1 à 3 mots en français
 Pas de markdown, pas d'explication — uniquement le tableau JSON brut.

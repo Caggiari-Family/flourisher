@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './Sidebar.css';
 
 export default function Sidebar({
@@ -28,6 +28,19 @@ export default function Sidebar({
   const [showDesc, setShowDesc]       = useState(false);
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
+  const [aiMenuOpen, setAiMenuOpen]   = useState(false);
+  const aiMenuRef                     = useRef(null);
+
+  useEffect(() => {
+    if (!aiMenuOpen) return;
+    const handler = (e) => {
+      if (aiMenuRef.current && !aiMenuRef.current.contains(e.target)) {
+        setAiMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [aiMenuOpen]);
 
   const handleAddSubmit = (e) => {
     e.preventDefault();
@@ -104,12 +117,31 @@ export default function Sidebar({
                 title={canLink ? 'Create edge(s) between selected tags' : 'Select ≥2 tags'}>
                 🔗 Link
               </button>
-              <button className="btn btn--ai" onClick={onRequestSuggestions} disabled={loading}>
-                {loading ? <><span className="spinner" /> Thinking…</> : '✨ Suggest'}
-              </button>
-              <button className="btn btn--flourish" onClick={onRequestFlourish} disabled={loading}>
-                {loading ? <><span className="spinner" /> Thinking…</> : '🌱 Flourish'}
-              </button>
+              <div className="ai-dropdown" ref={aiMenuRef}>
+                <button
+                  className="btn btn--ai"
+                  disabled={loading}
+                  onClick={() => setAiMenuOpen((o) => !o)}
+                >
+                  {loading ? <><span className="spinner" /> Thinking…</> : <>✨ AI <span className="ai-dropdown__caret">▾</span></>}
+                </button>
+                {aiMenuOpen && !loading && (
+                  <ul className="ai-dropdown__menu">
+                    <li>
+                      <button className="ai-dropdown__item" onClick={() => { setAiMenuOpen(false); onRequestSuggestions(); }}>
+                        ✨ Suggest
+                        <span className="ai-dropdown__item-hint">new tags from selection</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button className="ai-dropdown__item" onClick={() => { setAiMenuOpen(false); onRequestFlourish(); }}>
+                        🌱 Flourish
+                        <span className="ai-dropdown__item-hint">expand full graph</span>
+                      </button>
+                    </li>
+                  </ul>
+                )}
+              </div>
               <button className="btn btn--ghost" onClick={onClearSelection}>Clear</button>
             </div>
           </>
