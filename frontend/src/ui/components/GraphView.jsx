@@ -121,6 +121,7 @@ export default function GraphView({
   return (
     <div className="graph-view">
       <ForceGraph2D
+        key={`${fgData.nodes.length}:${fgData.links.length}`}
         ref={fgRef}
         graphData={fgData}
         nodeCanvasObject={paintNode}
