@@ -3,25 +3,22 @@
 .sidebar {
   width: 290px;
   flex-shrink: 0;
-  height: 100%;
   background: #1a1d2e;
   border-right: 1px solid #2d3148;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar__section {
   padding: 16px;
   border-bottom: 1px solid #2d3148;
+  flex-shrink: 0;
 }
 
 .sidebar__section--flex {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .sidebar__section-title {
@@ -290,8 +287,8 @@
 
 .node-list {
   list-style: none;
-  flex: 1;
   overflow-y: auto;
+  max-height: 40vh;
   display: flex;
   flex-direction: column;
   gap: 3px;
