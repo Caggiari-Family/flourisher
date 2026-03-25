@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import './GraphPage.css';
 
 export default function GraphPage({ token, onLogout }) {
-  const { ollamaUrl, ollamaModel, language, saveOllamaUrl, saveOllamaModel, saveLanguage, getSuggestions } =
+  const { ollamaUrl, ollamaModel, language, saveOllamaUrl, saveOllamaModel, saveLanguage, getSuggestions, getFlourish } =
     useOllama();
 
   const {
@@ -22,9 +22,10 @@ export default function GraphPage({ token, onLogout }) {
     linkSelectedNodes,
     removeEdge,
     requestSuggestions,
+    requestFlourish,
     acceptSuggestion,
     rejectSuggestion,
-  } = useGraph(token, getSuggestions);
+  } = useGraph(token, getSuggestions, getFlourish);
 
   return (
     <div className="graph-page">
@@ -68,6 +69,7 @@ export default function GraphPage({ token, onLogout }) {
           onLinkNodes={linkSelectedNodes}
           onRemoveEdge={removeEdge}
           onRequestSuggestions={requestSuggestions}
+          onRequestFlourish={requestFlourish}
           onAccept={acceptSuggestion}
           onReject={rejectSuggestion}
         />

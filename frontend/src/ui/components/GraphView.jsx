@@ -131,6 +131,9 @@ export default function GraphView({
         onNodeRightClick={handleNodeRightClick}
         linkColor={() => '#2d3748'}
         linkWidth={1.5}
+        linkDirectionalArrowLength={8}
+        linkDirectionalArrowRelPos={1}
+        linkDirectionalArrowColor={() => '#475569'}
         backgroundColor="#0f1117"
         cooldownTicks={100}
         d3AlphaDecay={0.015}

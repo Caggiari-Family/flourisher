@@ -2,15 +2,11 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { createTagApi } from '../infrastructure/api/tag.api';
 
 /**
- * Application-layer hook that manages the graph state and orchestrates all
- * tag / edge / suggestion operations.
- *
  * @param {string}   token           JWT access token
  * @param {Function} getSuggestions  (selectedTags) => Promise<{name,description}[]>
- *                                   Injected so this hook stays agnostic of the
- *                                   LLM provider (Ollama, future providers, etc.)
+ * @param {Function} getFlourish     (nodes, edges) => Promise<{source,target}[]>
  */
-export function useGraph(token, getSuggestions) {
+export function useGraph(token, getSuggestions, getFlourish) {
   const api = useMemo(() => createTagApi(token), [token]);
 
   const [graphData, setGraphData]     = useState({ nodes: [], edges: [] });
@@ -95,7 +91,7 @@ export function useGraph(token, getSuggestions) {
     }
   }, [api, reload, notify]);
 
-  // ── LLM suggestions (provider-agnostic) ──────────────────────────────────
+  // ── Suggest ───────────────────────────────────────────────────────────────
 
   const requestSuggestions = useCallback(async () => {
     if (selectedIds.size === 0 || !getSuggestions) return;
@@ -105,7 +101,6 @@ export function useGraph(token, getSuggestions) {
     try {
       const suggestions = await getSuggestions(selectedNodes);
 
-      // Persist suggestions as nodes + edges via the backend REST API
       for (const s of suggestions) {
         const tag = await api.createTag(s.name, s.description ?? '', true);
         for (const sourceId of selectedIds) {
@@ -121,6 +116,68 @@ export function useGraph(token, getSuggestions) {
       setLoading(false);
     }
   }, [api, graphData.nodes, selectedIds, getSuggestions, reload, notify]);
+
+  // ── Flourish ──────────────────────────────────────────────────────────────
+
+  const requestFlourish = useCallback(async () => {
+    if (!getFlourish) return;
+
+    const { nodes, edges } = graphData;
+    if (nodes.filter((n) => !n.suggested).length === 0) return;
+
+    // Build name-resolved edges for the prompt
+    const nodeById = Object.fromEntries(nodes.map((n) => [n.id, n]));
+    const resolvedEdges = edges
+      .map((e) => ({
+        sourceName: nodeById[e.source]?.name,
+        targetName: nodeById[e.target]?.name,
+      }))
+      .filter((e) => e.sourceName && e.targetName);
+
+    setLoading(true);
+    try {
+      // Ask Ollama for new edges (source/target are tag names, possibly new)
+      const newEdges = await getFlourish(nodes.filter((n) => !n.suggested), resolvedEdges);
+
+      // Build a name→id map of existing permanent nodes
+      const nameToId = Object.fromEntries(
+        nodes.filter((n) => !n.suggested).map((n) => [n.name.toLowerCase(), n.id]),
+      );
+
+      // Create new suggested nodes for names not yet in the graph
+      const createdIds = { ...nameToId };
+      const newNames = new Set(
+        newEdges.flatMap((e) => [e.source, e.target])
+          .filter((name) => !createdIds[name?.toLowerCase()]),
+      );
+
+      for (const name of newNames) {
+        if (!name) continue;
+        const tag = await api.createTag(name, '', true);
+        createdIds[name.toLowerCase()] = tag.id;
+      }
+
+      // Create the suggested edges
+      let edgeCount = 0;
+      for (const e of newEdges) {
+        const srcId = createdIds[e.source?.toLowerCase()];
+        const tgtId = createdIds[e.target?.toLowerCase()];
+        if (srcId && tgtId && srcId !== tgtId) {
+          await api.createEdge(srcId, tgtId, 'flourish');
+          edgeCount++;
+        }
+      }
+
+      await reload();
+      notify(`Flourish: ${newNames.size} new tag(s), ${edgeCount} edge(s) added`, 'success');
+    } catch (err) {
+      notify(`Flourish failed: ${err.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [api, graphData, getFlourish, reload, notify]);
+
+  // ── accept / reject ───────────────────────────────────────────────────────
 
   const acceptSuggestion = useCallback(async (id) => {
     try {
@@ -161,6 +218,7 @@ export function useGraph(token, getSuggestions) {
     linkSelectedNodes,
     removeEdge,
     requestSuggestions,
+    requestFlourish,
     acceptSuggestion,
     rejectSuggestion,
   };

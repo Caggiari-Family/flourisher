@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ollamaSuggest } from '../infrastructure/ollama/ollama.client';
+import { ollamaSuggest, ollamaFlourish } from '../infrastructure/ollama/ollama.client';
 
 const URL_KEY      = 'flourisher_ollama_url';
 const MODEL_KEY    = 'flourisher_ollama_model';
@@ -40,6 +40,11 @@ export function useOllama() {
     [ollamaUrl, ollamaModel, language],
   );
 
+  const getFlourish = useCallback(
+    (nodes, edges) => ollamaFlourish(ollamaUrl, ollamaModel, nodes, edges, language),
+    [ollamaUrl, ollamaModel, language],
+  );
+
   return {
     ollamaUrl,
     ollamaModel,
@@ -48,5 +53,6 @@ export function useOllama() {
     saveOllamaModel,
     saveLanguage,
     getSuggestions,
+    getFlourish,
   };
 }

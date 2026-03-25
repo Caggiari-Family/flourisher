@@ -19,6 +19,7 @@ export default function Sidebar({
   onLinkNodes,
   onRemoveEdge,
   onRequestSuggestions,
+  onRequestFlourish,
   onAccept,
   onReject,
 }) {
@@ -106,6 +107,9 @@ export default function Sidebar({
               <button className="btn btn--ai" onClick={onRequestSuggestions} disabled={loading}>
                 {loading ? <><span className="spinner" /> Thinking…</> : '✨ Suggest'}
               </button>
+              <button className="btn btn--flourish" onClick={onRequestFlourish} disabled={loading}>
+                {loading ? <><span className="spinner" /> Thinking…</> : '🌱 Flourish'}
+              </button>
               <button className="btn btn--ghost" onClick={onClearSelection}>Clear</button>
             </div>
           </>
@@ -150,10 +154,12 @@ export default function Sidebar({
               className={`node-item ${selectedIds.has(n.id) ? 'node-item--selected' : ''}`}
               onClick={() => onToggleSelect(n.id)}
             >
-              <div className="node-item__name">{n.name}</div>
+              <div className="node-item__header">
+                <div className="node-item__name">{n.name}</div>
+                <button className="node-item__delete" title="Delete"
+                  onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
+              </div>
               {n.description && <div className="node-item__desc">{n.description}</div>}
-              <button className="node-item__delete" title="Delete"
-                onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
             </li>
           ))}
         </ul>
