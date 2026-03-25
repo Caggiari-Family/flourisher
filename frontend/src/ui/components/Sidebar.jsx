@@ -208,7 +208,7 @@ export default function Sidebar({
               const src = nodes.find((n) => n.id === e.source);
               const tgt = nodes.find((n) => n.id === e.target);
               return (
-                <li key={e.id ?? i} className="edge-item">
+                <li key={i} className="edge-item">
                   <span className="edge-item__label">
                     {src?.name ?? '?'} → {tgt?.name ?? '?'}
                     {e.label ? ` (${e.label})` : ''}
