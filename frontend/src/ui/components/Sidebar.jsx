@@ -9,11 +9,13 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLOR = {
-  thinking:      '#8b5cf6',
-  pending:       '#f59e0b',
-  done:          '#10b981',
+  thinking:       '#8b5cf6',
+  pending:        '#f59e0b',
+  done:           '#10b981',
   not_interested: '#ef4444',
 };
+
+const statusColor = (s) => STATUS_COLOR[s] ?? STATUS_COLOR.thinking;
 
 export default function Sidebar({
   nodes,
@@ -256,8 +258,8 @@ export default function Sidebar({
                     onClick={() => onToggleSelect(n.id)}
                   >
                     <div className="node-item__header">
-                      {STATUS_COLOR[n.status] && (
-                        <span className="status-dot" style={{ background: STATUS_COLOR[n.status] }} title={n.status} />
+                      {(
+                        <span className="status-dot" style={{ background: statusColor(n.status) }} title={n.status || 'thinking'} />
                       )}
                       <div className="node-item__name">{n.name}</div>
                       <button className="node-item__icon-btn" title="Edit" onClick={(e) => openEdit(e, n)}>✎</button>
@@ -301,8 +303,8 @@ export default function Sidebar({
                     const tgt = nodes.find((n) => n.id === e.target);
                     return (
                       <li key={i} className="edge-item">
-                        {STATUS_COLOR[e.status] && (
-                          <span className="status-dot" style={{ background: STATUS_COLOR[e.status] }} title={e.status} />
+                        {(
+                          <span className="status-dot" style={{ background: statusColor(e.status) }} title={e.status || 'thinking'} />
                         )}
                         <span className="edge-item__label">
                           {src?.name ?? '?'} → {tgt?.name ?? '?'}

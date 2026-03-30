@@ -67,9 +67,9 @@ export default function GraphView({
           done:           { fill: '#0f2a1a', stroke: '#10b981' },
           not_interested: { fill: '#2a0a0a', stroke: '#ef4444' },
         };
-        const statusColor = statusColors[node.status] ?? null;
-        ctx.fillStyle = statusColor ? statusColor.fill : '#1e3a5f';
-        ctx.strokeStyle = statusColor ? statusColor.stroke : '#3b82f6';
+        const statusColor = statusColors[node.status] ?? statusColors.thinking;
+        ctx.fillStyle = statusColor.fill;
+        ctx.strokeStyle = statusColor.stroke;
         ctx.setLineDash([]);
       }
 
@@ -137,21 +137,19 @@ export default function GraphView({
         onNodeClick={handleNodeClick}
         onNodeRightClick={handleNodeRightClick}
         linkColor={(link) => {
-          if (link.status === 'thinking') return '#8b5cf6';
           if (link.status === 'pending') return '#f59e0b';
           if (link.status === 'done') return '#10b981';
           if (link.status === 'not_interested') return '#ef4444';
-          return '#8b5cf6';
+          return '#8b5cf6'; // thinking or unset
         }}
         linkWidth={1.5}
         linkDirectionalArrowLength={8}
         linkDirectionalArrowRelPos={1}
         linkDirectionalArrowColor={(link) => {
-          if (link.status === 'thinking') return '#8b5cf6';
           if (link.status === 'pending') return '#f59e0b';
           if (link.status === 'done') return '#10b981';
           if (link.status === 'not_interested') return '#ef4444';
-          return '#8b5cf6';
+          return '#8b5cf6'; // thinking or unset
         }}
         backgroundColor="#0f1117"
         cooldownTicks={300}
