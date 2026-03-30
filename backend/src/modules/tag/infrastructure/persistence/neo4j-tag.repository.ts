@@ -100,7 +100,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     try {
       const result = await session.run(
         `MATCH (a:Tag)-[r:RELATED_TO]->(b:Tag)
-         RETURN coalesce(r.id, toString(elementId(r))) AS id, a.id AS source, b.id AS target, r.label AS label`,
+         RETURN coalesce(r.id, toString(elementId(r))) AS id, a.id AS source, b.id AS target, r.label AS label, r.status AS status`,
       );
       return result.records.map((r) => this.toEdge(r));
     } finally {
@@ -115,8 +115,8 @@ export class Neo4jTagRepository implements TagRepositoryPort {
       const label = input.label ?? '';
       const result = await session.run(
         `MATCH (a:Tag {id: $sourceId}), (b:Tag {id: $targetId})
-         CREATE (a)-[r:RELATED_TO {id: $id, label: $label}]->(b)
-         RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label`,
+         CREATE (a)-[r:RELATED_TO {id: $id, label: $label, status: ''}]->(b)
+         RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label, r.status AS status`,
         { sourceId: input.sourceId, targetId: input.targetId, id, label },
       );
       if (result.records.length === 0) {
@@ -128,14 +128,17 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     }
   }
 
-  async updateEdge(id: string, label: string): Promise<Edge> {
+  async updateEdge(id: string, input: { label?: string; status?: string }): Promise<Edge> {
     const session = this.neo4j.getSession();
     try {
+      const setClauses = Object.keys(input)
+        .map((k) => `r.${k} = $${k}`)
+        .join(', ');
       const result = await session.run(
         `MATCH (a:Tag)-[r:RELATED_TO {id: $id}]->(b:Tag)
-         SET r.label = $label
-         RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label`,
-        { id, label },
+         SET ${setClauses}
+         RETURN coalesce(r.id, toString(elementId(r))) AS id, a.id AS source, b.id AS target, r.label AS label, r.status AS status`,
+        { id, ...input },
       );
       if (result.records.length === 0) {
         throw new NotFoundException(`Edge ${id} not found`);
@@ -158,7 +161,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
   // ── Mappers ───────────────────────────────────────────────────────────────
 
   private toTag(p: Record<string, any>): Tag {
-    return new Tag(p.id, p.name, p.description ?? '', p.suggested === true);
+    return new Tag(p.id, p.name, p.description ?? '', p.suggested === true, p.status ?? '');
   }
 
   private toEdge(r: any): Edge {
@@ -167,6 +170,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
       source: r.get('source'),
       target: r.get('target'),
       label: r.get('label') ?? '',
+      status: r.get('status') ?? '',
     };
   }
 }

@@ -22,6 +22,7 @@ export default function GraphPage({ token, onLogout }) {
     clearSelection,
     linkSelectedNodes,
     removeEdge,
+    updateEdge,
     requestSuggestions,
     requestFlourish,
     acceptSuggestion,
@@ -70,6 +71,7 @@ export default function GraphPage({ token, onLogout }) {
           onClearSelection={clearSelection}
           onLinkNodes={linkSelectedNodes}
           onRemoveEdge={removeEdge}
+          onUpdateEdge={updateEdge}
           onRequestSuggestions={requestSuggestions}
           onRequestFlourish={requestFlourish}
           onAccept={acceptSuggestion}

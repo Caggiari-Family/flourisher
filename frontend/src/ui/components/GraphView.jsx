@@ -31,7 +31,7 @@ export default function GraphView({
   const fgData = useMemo(
     () => ({
       nodes: graphData.nodes.map((n) => ({ ...n })),
-      links: graphData.edges.map((e) => ({ source: e.source, target: e.target })),
+      links: graphData.edges.map((e) => ({ source: e.source, target: e.target, status: e.status })),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(graphData)],
@@ -61,8 +61,14 @@ export default function GraphView({
         ctx.strokeStyle = '#fbbf24';
         ctx.setLineDash([]);
       } else {
-        ctx.fillStyle = '#1e3a5f';
-        ctx.strokeStyle = '#3b82f6';
+        const statusColors = {
+          done:           { fill: '#0f2a1a', stroke: '#10b981' },
+          pending:        { fill: '#2a1800', stroke: '#f59e0b' },
+          not_interested: { fill: '#2a0a0a', stroke: '#ef4444' },
+        };
+        const statusColor = statusColors[node.status] ?? null;
+        ctx.fillStyle = statusColor ? statusColor.fill : '#1e3a5f';
+        ctx.strokeStyle = statusColor ? statusColor.stroke : '#3b82f6';
         ctx.setLineDash([]);
       }
 
@@ -129,11 +135,21 @@ export default function GraphView({
         nodeLabel={nodeLabel}
         onNodeClick={handleNodeClick}
         onNodeRightClick={handleNodeRightClick}
-        linkColor={() => '#2d3748'}
+        linkColor={(link) => {
+          if (link.status === 'done') return '#10b981';
+          if (link.status === 'pending') return '#f59e0b';
+          if (link.status === 'not_interested') return '#ef4444';
+          return '#2d3748';
+        }}
         linkWidth={1.5}
         linkDirectionalArrowLength={8}
         linkDirectionalArrowRelPos={1}
-        linkDirectionalArrowColor={() => '#475569'}
+        linkDirectionalArrowColor={(link) => {
+          if (link.status === 'done') return '#10b981';
+          if (link.status === 'pending') return '#f59e0b';
+          if (link.status === 'not_interested') return '#ef4444';
+          return '#475569';
+        }}
         backgroundColor="#0f1117"
         cooldownTicks={300}
         d3AlphaDecay={0.015}

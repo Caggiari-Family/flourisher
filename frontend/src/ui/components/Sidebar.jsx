@@ -1,6 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import './Sidebar.css';
 
+const STATUS_OPTIONS = [
+  { value: '', label: '—' },
+  { value: 'done', label: 'Done' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'not_interested', label: 'Not interested' },
+];
+
+const STATUS_COLOR = {
+  done: '#10b981',
+  pending: '#f59e0b',
+  not_interested: '#ef4444',
+};
+
 export default function Sidebar({
   nodes,
   edges,
@@ -19,6 +32,7 @@ export default function Sidebar({
   onClearSelection,
   onLinkNodes,
   onRemoveEdge,
+  onUpdateEdge,
   onRequestSuggestions,
   onRequestFlourish,
   onAccept,
@@ -30,25 +44,47 @@ export default function Sidebar({
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
   const [aiMenuOpen, setAiMenuOpen]   = useState(false);
-  const [editingNode, setEditingNode] = useState(null); // { id, name, description }
+  const [editingNode, setEditingNode] = useState(null); // { id, name, description, status }
   const [editName, setEditName]       = useState('');
   const [editDesc, setEditDesc]       = useState('');
+  const [editNodeStatus, setEditNodeStatus] = useState('');
+
+  // Edge editing state
+  const [editingEdge, setEditingEdge]     = useState(null); // edge object
+  const [editEdgeLabel, setEditEdgeLabel] = useState('');
+  const [editEdgeStatus, setEditEdgeStatus] = useState('');
 
   const openEdit = (e, n) => {
     e.stopPropagation();
     setEditingNode(n);
     setEditName(n.name);
     setEditDesc(n.description ?? '');
+    setEditNodeStatus(n.status ?? '');
   };
 
   const closeEdit = () => setEditingNode(null);
 
   const saveEdit = () => {
     if (!editName.trim()) return;
-    onUpdateTag(editingNode.id, editName.trim(), editDesc.trim());
+    onUpdateTag(editingNode.id, editName.trim(), editDesc.trim(), editNodeStatus);
     closeEdit();
   };
-  const aiMenuRef                     = useRef(null);
+
+  const openEdgeEdit = (e, edge) => {
+    e.stopPropagation();
+    setEditingEdge(edge);
+    setEditEdgeLabel(edge.label ?? '');
+    setEditEdgeStatus(edge.status ?? '');
+  };
+
+  const closeEdgeEdit = () => setEditingEdge(null);
+
+  const saveEdgeEdit = () => {
+    onUpdateEdge(editingEdge.id, editEdgeLabel, editEdgeStatus);
+    closeEdgeEdit();
+  };
+
+  const aiMenuRef = useRef(null);
 
   useEffect(() => {
     if (!aiMenuOpen) return;
@@ -206,6 +242,13 @@ export default function Sidebar({
               onClick={() => onToggleSelect(n.id)}
             >
               <div className="node-item__header">
+                {n.status && STATUS_COLOR[n.status] && (
+                  <span
+                    className="status-dot"
+                    style={{ background: STATUS_COLOR[n.status] }}
+                    title={n.status}
+                  />
+                )}
                 <div className="node-item__name">{n.name}</div>
                 <button className="node-item__icon-btn" title="Edit"
                   onClick={(e) => openEdit(e, n)}>✎</button>
@@ -229,10 +272,19 @@ export default function Sidebar({
               const tgt = nodes.find((n) => n.id === e.target);
               return (
                 <li key={i} className="edge-item">
+                  {e.status && STATUS_COLOR[e.status] && (
+                    <span
+                      className="status-dot"
+                      style={{ background: STATUS_COLOR[e.status] }}
+                      title={e.status}
+                    />
+                  )}
                   <span className="edge-item__label">
                     {src?.name ?? '?'} → {tgt?.name ?? '?'}
                     {e.label ? ` (${e.label})` : ''}
                   </span>
+                  <button className="node-item__icon-btn" title="Edit edge"
+                    onClick={(ev) => openEdgeEdit(ev, e)}>✎</button>
                   <button className="node-item__delete" title="Delete edge"
                     onClick={() => onRemoveEdge(e.id)}>×</button>
                 </li>
@@ -289,9 +341,51 @@ export default function Sidebar({
               onChange={(e) => setEditDesc(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Escape') closeEdit(); }}
             />
+            <label className="sidebar__label" style={{ marginTop: 10 }}>Status</label>
+            <select
+              className="sidebar__input status-select"
+              value={editNodeStatus}
+              onChange={(e) => setEditNodeStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
             <div className="edit-modal__actions">
               <button className="btn btn--primary" onClick={saveEdit} disabled={!editName.trim()}>Save</button>
               <button className="btn btn--ghost" onClick={closeEdit}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit edge modal ───────────────────────── */}
+      {editingEdge && (
+        <div className="edit-modal-overlay" onClick={closeEdgeEdit}>
+          <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="edit-modal__title">Edit Edge</h3>
+            <label className="sidebar__label">Label</label>
+            <input
+              className="sidebar__input"
+              value={editEdgeLabel}
+              autoFocus
+              placeholder="Label (optional)…"
+              onChange={(e) => setEditEdgeLabel(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') saveEdgeEdit(); if (e.key === 'Escape') closeEdgeEdit(); }}
+            />
+            <label className="sidebar__label" style={{ marginTop: 10 }}>Status</label>
+            <select
+              className="sidebar__input status-select"
+              value={editEdgeStatus}
+              onChange={(e) => setEditEdgeStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <div className="edit-modal__actions">
+              <button className="btn btn--primary" onClick={saveEdgeEdit}>Save</button>
+              <button className="btn btn--ghost" onClick={closeEdgeEdit}>Cancel</button>
             </div>
           </div>
         </div>

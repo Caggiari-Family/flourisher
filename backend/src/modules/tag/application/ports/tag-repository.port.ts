@@ -10,6 +10,7 @@ export interface UpdateTagInput {
   name?: string;
   description?: string;
   suggested?: boolean;
+  status?: string;
 }
 
 export interface CreateEdgeInput {
@@ -27,6 +28,6 @@ export abstract class TagRepositoryPort {
   abstract updateTag(id: string, input: UpdateTagInput): Promise<Tag>;
   abstract deleteTag(id: string): Promise<void>;
   abstract createEdge(input: CreateEdgeInput): Promise<Edge>;
-  abstract updateEdge(id: string, label: string): Promise<Edge>;
+  abstract updateEdge(id: string, input: { label?: string; status?: string }): Promise<Edge>;
   abstract deleteEdge(id: string): Promise<void>;
 }

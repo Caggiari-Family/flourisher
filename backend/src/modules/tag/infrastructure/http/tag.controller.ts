@@ -99,7 +99,7 @@ export class TagController {
 
   @Put('edges/:id')
   updateEdgeRoute(@Param('id') id: string, @Body() dto: UpdateEdgeDto) {
-    return this.updateEdge.execute(new UpdateEdgeCommand(id, dto.label));
+    return this.updateEdge.execute(new UpdateEdgeCommand(id, dto.label, dto.status));
   }
 
   @Delete('edges/:id')

@@ -44,9 +44,9 @@ export function useGraph(token, getSuggestions, getFlourish) {
     }
   }, [api, reload, notify]);
 
-  const updateTag = useCallback(async (id, name, description) => {
+  const updateTag = useCallback(async (id, name, description, status) => {
     try {
-      await api.updateTag(id, { name, description });
+      await api.updateTag(id, { name, description, status });
       await reload();
     } catch {
       notify('Failed to update tag', 'error');
@@ -97,6 +97,15 @@ export function useGraph(token, getSuggestions, getFlourish) {
       notify('Edge deleted', 'info');
     } catch {
       notify('Failed to delete edge', 'error');
+    }
+  }, [api, reload, notify]);
+
+  const updateEdge = useCallback(async (id, label, status) => {
+    try {
+      await api.updateEdge(id, label, status);
+      await reload();
+    } catch {
+      notify('Failed to update edge', 'error');
     }
   }, [api, reload, notify]);
 
@@ -234,6 +243,7 @@ export function useGraph(token, getSuggestions, getFlourish) {
     clearSelection,
     linkSelectedNodes,
     removeEdge,
+    updateEdge,
     requestSuggestions,
     requestFlourish,
     acceptSuggestion,

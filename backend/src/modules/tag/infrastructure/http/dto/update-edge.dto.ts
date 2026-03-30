@@ -1,3 +1,4 @@
 export class UpdateEdgeDto {
-  label: string;
+  label?: string;
+  status?: string;
 }

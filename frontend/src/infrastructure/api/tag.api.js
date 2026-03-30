@@ -29,7 +29,7 @@ export function createTagApi(token) {
     createEdge: (sourceId, targetId, label = '') =>
       client.post('/edges', { sourceId, targetId, label }),
 
-    updateEdge: (id, label) => client.put(`/edges/${id}`, { label }),
+    updateEdge: (id, label, status) => client.put(`/edges/${id}`, { label, status }),
 
     deleteEdge: (id) => client.delete(`/edges/${id}`),
   };
