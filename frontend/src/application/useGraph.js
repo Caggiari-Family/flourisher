@@ -44,6 +44,15 @@ export function useGraph(token, getSuggestions, getFlourish) {
     }
   }, [api, reload, notify]);
 
+  const updateTag = useCallback(async (id, name) => {
+    try {
+      await api.updateTag(id, { name });
+      await reload();
+    } catch {
+      notify('Failed to rename tag', 'error');
+    }
+  }, [api, reload, notify]);
+
   const removeTag = useCallback(async (id) => {
     try {
       await api.deleteTag(id);
@@ -219,6 +228,7 @@ export function useGraph(token, getSuggestions, getFlourish) {
     loading,
     toast,
     addTag,
+    updateTag,
     removeTag,
     toggleSelect,
     clearSelection,

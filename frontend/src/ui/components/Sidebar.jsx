@@ -13,6 +13,7 @@ export default function Sidebar({
   onSaveOllamaUrl,
   onSaveOllamaModel,
   onAddTag,
+  onUpdateTag,
   onRemoveTag,
   onToggleSelect,
   onClearSelection,
@@ -29,6 +30,8 @@ export default function Sidebar({
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
   const [aiMenuOpen, setAiMenuOpen]   = useState(false);
+  const [editingId, setEditingId]     = useState(null);
+  const [editingName, setEditingName] = useState('');
   const aiMenuRef                     = useRef(null);
 
   useEffect(() => {
@@ -187,7 +190,39 @@ export default function Sidebar({
               onClick={() => onToggleSelect(n.id)}
             >
               <div className="node-item__header">
-                <div className="node-item__name">{n.name}</div>
+                {editingId === n.id ? (
+                  <input
+                    className="node-item__edit-input"
+                    value={editingName}
+                    autoFocus
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && editingName.trim()) {
+                        onUpdateTag(n.id, editingName.trim());
+                        setEditingId(null);
+                      } else if (e.key === 'Escape') {
+                        setEditingId(null);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (editingName.trim() && editingName.trim() !== n.name) {
+                        onUpdateTag(n.id, editingName.trim());
+                      }
+                      setEditingId(null);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ) : (
+                  <div
+                    className="node-item__name"
+                    title="Double-click to rename"
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      setEditingId(n.id);
+                      setEditingName(n.name);
+                    }}
+                  >{n.name}</div>
+                )}
                 <button className="node-item__delete" title="Delete"
                   onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
               </div>

@@ -339,6 +339,19 @@
   word-break: break-word;
 }
 
+.node-item__edit-input {
+  flex: 1;
+  min-width: 0;
+  background: #0f1117;
+  border: 1px solid #6366f1;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 0.83rem;
+  font-family: inherit;
+  padding: 1px 6px;
+  outline: none;
+}
+
 .node-item__delete {
   background: none;
   border: none;

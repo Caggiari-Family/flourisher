@@ -16,6 +16,7 @@ export default function GraphPage({ token, onLogout }) {
     loading,
     toast,
     addTag,
+    updateTag,
     removeTag,
     toggleSelect,
     clearSelection,
@@ -63,6 +64,7 @@ export default function GraphPage({ token, onLogout }) {
           onSaveOllamaUrl={saveOllamaUrl}
           onSaveOllamaModel={saveOllamaModel}
           onAddTag={addTag}
+          onUpdateTag={updateTag}
           onRemoveTag={removeTag}
           onToggleSelect={toggleSelect}
           onClearSelection={clearSelection}
