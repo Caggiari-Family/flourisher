@@ -33,6 +33,10 @@
   gap: 6px;
 }
 
+.sidebar__search {
+  margin-bottom: 8px;
+}
+
 .sidebar__hint {
   font-size: 0.78rem;
   color: #334155;

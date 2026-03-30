@@ -45,6 +45,8 @@ export default function Sidebar({
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
   const [aiMenuOpen, setAiMenuOpen]   = useState(false);
+  const [nodeSearch, setNodeSearch]   = useState('');
+  const [edgeSearch, setEdgeSearch]   = useState('');
   const [editingNode, setEditingNode] = useState(null); // { id, name, description, status }
   const [editName, setEditName]       = useState('');
   const [editDesc, setEditDesc]       = useState('');
@@ -234,31 +236,39 @@ export default function Sidebar({
         <h2 className="sidebar__section-title">
           Tags <span className="badge">{permanentNodes.length}</span>
         </h2>
-        <ul className="node-list">
-          {permanentNodes.length === 0 && <li className="sidebar__hint">No tags yet.</li>}
-          {permanentNodes.map((n) => (
-            <li
-              key={n.id}
-              className={`node-item ${selectedIds.has(n.id) ? 'node-item--selected' : ''}`}
-              onClick={() => onToggleSelect(n.id)}
-            >
-              <div className="node-item__header">
-                {n.status && STATUS_COLOR[n.status] && (
-                  <span
-                    className="status-dot"
-                    style={{ background: STATUS_COLOR[n.status] }}
-                    title={n.status}
-                  />
-                )}
-                <div className="node-item__name">{n.name}</div>
-                <button className="node-item__icon-btn" title="Edit"
-                  onClick={(e) => openEdit(e, n)}>✎</button>
-                <button className="node-item__delete" title="Delete"
-                  onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <input
+          className="sidebar__input sidebar__search"
+          placeholder="Search tags…"
+          value={nodeSearch}
+          onChange={(e) => setNodeSearch(e.target.value)}
+        />
+        {nodeSearch.trim() && (() => {
+          const q = nodeSearch.toLowerCase();
+          const hits = permanentNodes.filter((n) => n.name.toLowerCase().includes(q));
+          return (
+            <ul className="node-list">
+              {hits.length === 0
+                ? <li className="sidebar__hint">No match.</li>
+                : hits.map((n) => (
+                  <li
+                    key={n.id}
+                    className={`node-item ${selectedIds.has(n.id) ? 'node-item--selected' : ''}`}
+                    onClick={() => onToggleSelect(n.id)}
+                  >
+                    <div className="node-item__header">
+                      {STATUS_COLOR[n.status] && (
+                        <span className="status-dot" style={{ background: STATUS_COLOR[n.status] }} title={n.status} />
+                      )}
+                      <div className="node-item__name">{n.name}</div>
+                      <button className="node-item__icon-btn" title="Edit" onClick={(e) => openEdit(e, n)}>✎</button>
+                      <button className="node-item__delete" title="Delete" onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
+                    </div>
+                  </li>
+                ))
+              }
+            </ul>
+          );
+        })()}
       </section>
 
       {/* ── Edge list ─────────────────────────────── */}
@@ -267,30 +277,46 @@ export default function Sidebar({
           <h2 className="sidebar__section-title">
             Edges <span className="badge">{edges.length}</span>
           </h2>
-          <ul className="edge-list">
-            {edges.map((e, i) => {
+          <input
+            className="sidebar__input sidebar__search"
+            placeholder="Search edges…"
+            value={edgeSearch}
+            onChange={(e) => setEdgeSearch(e.target.value)}
+          />
+          {edgeSearch.trim() && (() => {
+            const q = edgeSearch.toLowerCase();
+            const hits = edges.filter((e) => {
               const src = nodes.find((n) => n.id === e.source);
               const tgt = nodes.find((n) => n.id === e.target);
-              return (
-                <li key={i} className="edge-item">
-                  {e.status && STATUS_COLOR[e.status] && (
-                    <span
-                      className="status-dot"
-                      style={{ background: STATUS_COLOR[e.status] }}
-                      title={e.status}
-                    />
-                  )}
-                  <span className="edge-item__label">
-                    {src?.name ?? '?'} → {tgt?.name ?? '?'}
-                    {e.label ? ` (${e.label})` : ''}
-                  </span>
-                  <button className="node-item__icon-btn" title="Edit edge"
-                    onClick={(ev) => openEdgeEdit(ev, e)}>✎</button>
-                  <button className="node-item__delete" title="Delete edge"
-                    onClick={() => onRemoveEdge(e.id)}>×</button>
-                </li>
-              );
-            })}
+              return (src?.name ?? '').toLowerCase().includes(q)
+                  || (tgt?.name ?? '').toLowerCase().includes(q)
+                  || (e.label ?? '').toLowerCase().includes(q);
+            });
+            return (
+              <ul className="edge-list">
+                {hits.length === 0
+                  ? <li className="sidebar__hint" style={{ padding: '4px 0' }}>No match.</li>
+                  : hits.map((e, i) => {
+                    const src = nodes.find((n) => n.id === e.source);
+                    const tgt = nodes.find((n) => n.id === e.target);
+                    return (
+                      <li key={i} className="edge-item">
+                        {STATUS_COLOR[e.status] && (
+                          <span className="status-dot" style={{ background: STATUS_COLOR[e.status] }} title={e.status} />
+                        )}
+                        <span className="edge-item__label">
+                          {src?.name ?? '?'} → {tgt?.name ?? '?'}
+                          {e.label ? ` (${e.label})` : ''}
+                        </span>
+                        <button className="node-item__icon-btn" title="Edit edge" onClick={(ev) => openEdgeEdit(ev, e)}>✎</button>
+                        <button className="node-item__delete" title="Delete edge" onClick={() => onRemoveEdge(e.id)}>×</button>
+                      </li>
+                    );
+                  })
+                }
+              </ul>
+            );
+          })()}
           </ul>
         </section>
       )}
