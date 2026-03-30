@@ -197,7 +197,6 @@ export default function Sidebar({
                     <span className="status-dot" style={{ background: statusColor(n.status) }} title={n.status || 'thinking'} />
                     <div className="node-item__name">{n.name}</div>
                     <button className="node-item__icon-btn" title="Edit" onClick={(e) => openEdit(e, n)}>✎</button>
-                    <button className="node-item__delete" title="Deselect" onClick={() => onToggleSelect(n.id)}>×</button>
                     <button className="node-item__delete" title="Delete tag" onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>🗑</button>
                   </div>
                 </li>
