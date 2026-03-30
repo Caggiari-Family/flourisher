@@ -43,10 +43,13 @@ export default function Sidebar({
 }) {
   const [name, setName]               = useState('');
   const [description, setDescription] = useState('');
+  const [addStatus, setAddStatus]     = useState('thinking');
   const [showDesc, setShowDesc]       = useState(false);
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
   const [aiMenuOpen, setAiMenuOpen]   = useState(false);
+  const [linkMenuOpen, setLinkMenuOpen] = useState(false);
+  const linkMenuRef = useRef(null);
   const [nodeSearch, setNodeSearch]   = useState('');
   const [edgeSearch, setEdgeSearch]   = useState('');
   const [editingNode, setEditingNode] = useState(null); // { id, name, description, status }
@@ -102,12 +105,24 @@ export default function Sidebar({
     return () => document.removeEventListener('mousedown', handler);
   }, [aiMenuOpen]);
 
+  useEffect(() => {
+    if (!linkMenuOpen) return;
+    const handler = (e) => {
+      if (linkMenuRef.current && !linkMenuRef.current.contains(e.target)) {
+        setLinkMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [linkMenuOpen]);
+
   const handleAddSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAddTag(name.trim(), description.trim());
+    onAddTag(name.trim(), description.trim(), addStatus);
     setName('');
     setDescription('');
+    setAddStatus('thinking');
     setShowDesc(false);
   };
 
@@ -147,6 +162,15 @@ export default function Sidebar({
               + add description
             </button>
           )}
+          <select
+            className="sidebar__input status-select"
+            value={addStatus}
+            onChange={(e) => setAddStatus(e.target.value)}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
           <button className="btn btn--primary" type="submit" disabled={!name.trim()}>
             Add Tag
           </button>
@@ -207,10 +231,31 @@ export default function Sidebar({
 
             {/* Actions */}
             <div className="sidebar__row" style={{ marginTop: 10 }}>
-              <button className="btn btn--link" onClick={onLinkNodes} disabled={!canLink}
-                title={canLink ? 'Create edge(s) between selected tags' : 'Select ≥2 tags'}>
-                🔗 Link
-              </button>
+              <div className="ai-dropdown" ref={linkMenuRef}>
+                <button
+                  className="btn btn--link"
+                  disabled={!canLink}
+                  title={canLink ? 'Create edge(s) between selected tags' : 'Select ≥2 tags'}
+                  onClick={() => canLink && setLinkMenuOpen((o) => !o)}
+                >
+                  🔗 Link <span className="ai-dropdown__caret">▾</span>
+                </button>
+                {linkMenuOpen && (
+                  <ul className="ai-dropdown__menu">
+                    {STATUS_OPTIONS.map((opt) => (
+                      <li key={opt.value}>
+                        <button
+                          className="ai-dropdown__item"
+                          onClick={() => { setLinkMenuOpen(false); onLinkNodes(opt.value); }}
+                        >
+                          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: STATUS_COLOR[opt.value], marginRight: 7, flexShrink: 0 }} />
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
               <div className="ai-dropdown" ref={aiMenuRef}>
                 <button
                   className="btn btn--ai"

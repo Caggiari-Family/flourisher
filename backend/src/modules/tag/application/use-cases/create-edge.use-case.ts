@@ -7,6 +7,7 @@ export class CreateEdgeCommand {
     public readonly sourceId: string,
     public readonly targetId: string,
     public readonly label: string = '',
+    public readonly status?: string,
   ) {}
 }
 
@@ -19,6 +20,7 @@ export class CreateEdgeUseCase {
       sourceId: cmd.sourceId,
       targetId: cmd.targetId,
       label: cmd.label,
+      status: cmd.status,
     });
   }
 }

@@ -34,9 +34,9 @@ export function useGraph(token, getSuggestions, getFlourish) {
 
   // ── node operations ───────────────────────────────────────────────────────
 
-  const addTag = useCallback(async (name, description) => {
+  const addTag = useCallback(async (name, description, status) => {
     try {
-      await api.createTag(name, description);
+      await api.createTag(name, description, false, status);
       await reload();
       notify(`"${name}" added`, 'success');
     } catch {
@@ -76,12 +76,12 @@ export function useGraph(token, getSuggestions, getFlourish) {
 
   // ── edge operations ───────────────────────────────────────────────────────
 
-  const linkSelectedNodes = useCallback(async () => {
+  const linkSelectedNodes = useCallback(async (status) => {
     const ids = [...selectedIds];
     if (ids.length < 2) return;
     try {
       for (let i = 0; i < ids.length - 1; i++) {
-        await api.createEdge(ids[i], ids[i + 1]);
+        await api.createEdge(ids[i], ids[i + 1], '', status);
       }
       await reload();
       notify(`${ids.length - 1} edge(s) created`, 'success');

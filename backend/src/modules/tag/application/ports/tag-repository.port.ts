@@ -4,6 +4,7 @@ export interface CreateTagInput {
   name: string;
   description: string;
   suggested: boolean;
+  status?: string;
 }
 
 export interface UpdateTagInput {
@@ -17,6 +18,7 @@ export interface CreateEdgeInput {
   sourceId: string;
   targetId: string;
   label?: string;
+  status?: string;
 }
 
 export abstract class TagRepositoryPort {

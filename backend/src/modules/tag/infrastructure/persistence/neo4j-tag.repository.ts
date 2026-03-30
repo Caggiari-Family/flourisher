@@ -55,9 +55,9 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     try {
       const id = uuidv4();
       const result = await session.run(
-        `CREATE (n:Tag {id: $id, name: $name, description: $description, suggested: $suggested, status: 'thinking'})
+        `CREATE (n:Tag {id: $id, name: $name, description: $description, suggested: $suggested, status: $status})
          RETURN n`,
-        { id, ...input },
+        { id, ...input, status: input.status ?? 'thinking' },
       );
       return this.toTag(result.records[0].get('n').properties);
     } finally {
@@ -115,9 +115,9 @@ export class Neo4jTagRepository implements TagRepositoryPort {
       const label = input.label ?? '';
       const result = await session.run(
         `MATCH (a:Tag {id: $sourceId}), (b:Tag {id: $targetId})
-         CREATE (a)-[r:RELATED_TO {id: $id, label: $label, status: 'thinking'}]->(b)
+         CREATE (a)-[r:RELATED_TO {id: $id, label: $label, status: $status}]->(b)
          RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label, r.status AS status`,
-        { sourceId: input.sourceId, targetId: input.targetId, id, label },
+        { sourceId: input.sourceId, targetId: input.targetId, id, label, status: input.status ?? 'thinking' },
       );
       if (result.records.length === 0) {
         throw new NotFoundException('One or both nodes not found');

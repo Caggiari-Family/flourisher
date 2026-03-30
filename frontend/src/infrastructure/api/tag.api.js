@@ -14,8 +14,8 @@ export function createTagApi(token) {
 
     // ── Nodes ────────────────────────────────────────────────────────────
     /** @param {boolean} [suggested=false]  Pass true for AI suggestion nodes */
-    createTag: (name, description, suggested = false) =>
-      client.post('/nodes', { name, description, suggested }),
+    createTag: (name, description, suggested = false, status) =>
+      client.post('/nodes', { name, description, suggested, ...(status ? { status } : {}) }),
 
     updateTag: (id, data) => client.put(`/nodes/${id}`, data),
 
@@ -26,8 +26,8 @@ export function createTagApi(token) {
     rejectSuggestion: (id) => client.delete(`/nodes/${id}/reject`),
 
     // ── Edges ────────────────────────────────────────────────────────────
-    createEdge: (sourceId, targetId, label = '') =>
-      client.post('/edges', { sourceId, targetId, label }),
+    createEdge: (sourceId, targetId, label = '', status) =>
+      client.post('/edges', { sourceId, targetId, label, ...(status ? { status } : {}) }),
 
     updateEdge: (id, label, status) => client.put(`/edges/${id}`, { label, status }),
 

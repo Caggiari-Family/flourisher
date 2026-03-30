@@ -57,7 +57,7 @@ export class TagController {
   @Post('nodes')
   createNode(@Body() dto: CreateTagDto) {
     return this.createTag.execute(
-      new CreateTagCommand(dto.name, dto.description ?? '', dto.suggested ?? false),
+      new CreateTagCommand(dto.name, dto.description ?? '', dto.suggested ?? false, dto.status),
     );
   }
 
@@ -93,7 +93,7 @@ export class TagController {
   @Post('edges')
   createEdgeRoute(@Body() dto: CreateEdgeDto) {
     return this.createEdge.execute(
-      new CreateEdgeCommand(dto.sourceId, dto.targetId, dto.label ?? ''),
+      new CreateEdgeCommand(dto.sourceId, dto.targetId, dto.label ?? '', dto.status),
     );
   }
 
