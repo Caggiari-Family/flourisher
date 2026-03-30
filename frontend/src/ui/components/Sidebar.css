@@ -138,6 +138,29 @@
   font-size: 0.65rem;
 }
 
+/* ── Selection sub-sections ──────────────────────────────────────────────── */
+
+.selection__sub-title {
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #334155;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.selection-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
 /* ── Chips (selected tags) ───────────────────────────────────────────────── */
 
 .chip-group {

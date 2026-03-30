@@ -164,15 +164,49 @@ export default function Sidebar({
           </p>
         ) : (
           <>
-            <div className="chip-group">
+            {/* Selected tags */}
+            <p className="selection__sub-title">Tags <span className="badge">{selectedNodes.length}</span></p>
+            <ul className="selection-list">
               {selectedNodes.map((n) => (
-                <span key={n.id} className="chip">
-                  {n.name}
-                  <button className="chip__remove" onClick={() => onToggleSelect(n.id)}>×</button>
-                </span>
+                <li key={n.id} className="node-item">
+                  <div className="node-item__header">
+                    <span className="status-dot" style={{ background: statusColor(n.status) }} title={n.status || 'thinking'} />
+                    <div className="node-item__name">{n.name}</div>
+                    <button className="node-item__icon-btn" title="Edit" onClick={(e) => openEdit(e, n)}>✎</button>
+                    <button className="node-item__delete" title="Deselect" onClick={() => onToggleSelect(n.id)}>×</button>
+                    <button className="node-item__delete" title="Delete tag" onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>🗑</button>
+                  </div>
+                </li>
               ))}
-            </div>
-            <div className="sidebar__row">
+            </ul>
+
+            {/* Edges between selected nodes */}
+            {(() => {
+              const selEdges = edges.filter((e) => selectedIds.has(e.source) && selectedIds.has(e.target));
+              if (selEdges.length === 0) return null;
+              const nodeById = Object.fromEntries(selectedNodes.map((n) => [n.id, n]));
+              return (
+                <>
+                  <p className="selection__sub-title" style={{ marginTop: 10 }}>Edges <span className="badge">{selEdges.length}</span></p>
+                  <ul className="selection-list">
+                    {selEdges.map((e, i) => (
+                      <li key={e.id ?? i} className="edge-item">
+                        <span className="status-dot" style={{ background: statusColor(e.status) }} title={e.status || 'thinking'} />
+                        <span className="edge-item__label">
+                          {nodeById[e.source]?.name ?? '?'} → {nodeById[e.target]?.name ?? '?'}
+                          {e.label ? ` (${e.label})` : ''}
+                        </span>
+                        <button className="node-item__icon-btn" title="Edit edge" onClick={(ev) => openEdgeEdit(ev, e)}>✎</button>
+                        <button className="node-item__delete" title="Delete edge" onClick={() => onRemoveEdge(e.id)}>🗑</button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              );
+            })()}
+
+            {/* Actions */}
+            <div className="sidebar__row" style={{ marginTop: 10 }}>
               <button className="btn btn--link" onClick={onLinkNodes} disabled={!canLink}
                 title={canLink ? 'Create edge(s) between selected tags' : 'Select ≥2 tags'}>
                 🔗 Link
