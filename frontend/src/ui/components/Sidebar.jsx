@@ -30,8 +30,24 @@ export default function Sidebar({
   const [urlDraft, setUrlDraft]       = useState(ollamaUrl);
   const [modelDraft, setModelDraft]   = useState(ollamaModel);
   const [aiMenuOpen, setAiMenuOpen]   = useState(false);
-  const [editingId, setEditingId]     = useState(null);
-  const [editingName, setEditingName] = useState('');
+  const [editingNode, setEditingNode] = useState(null); // { id, name, description }
+  const [editName, setEditName]       = useState('');
+  const [editDesc, setEditDesc]       = useState('');
+
+  const openEdit = (e, n) => {
+    e.stopPropagation();
+    setEditingNode(n);
+    setEditName(n.name);
+    setEditDesc(n.description ?? '');
+  };
+
+  const closeEdit = () => setEditingNode(null);
+
+  const saveEdit = () => {
+    if (!editName.trim()) return;
+    onUpdateTag(editingNode.id, editName.trim(), editDesc.trim());
+    closeEdit();
+  };
   const aiMenuRef                     = useRef(null);
 
   useEffect(() => {
@@ -187,39 +203,12 @@ export default function Sidebar({
             <li
               key={n.id}
               className={`node-item ${selectedIds.has(n.id) ? 'node-item--selected' : ''}`}
-              onClick={(e) => { if (e.detail < 2) onToggleSelect(n.id); }}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                setEditingId(n.id);
-                setEditingName(n.name);
-              }}
+              onClick={() => onToggleSelect(n.id)}
             >
               <div className="node-item__header">
-                {editingId === n.id ? (
-                  <input
-                    className="node-item__edit-input"
-                    value={editingName}
-                    autoFocus
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && editingName.trim()) {
-                        onUpdateTag(n.id, editingName.trim());
-                        setEditingId(null);
-                      } else if (e.key === 'Escape') {
-                        setEditingId(null);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (editingName.trim() && editingName.trim() !== n.name) {
-                        onUpdateTag(n.id, editingName.trim());
-                      }
-                      setEditingId(null);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <div className="node-item__name">{n.name}</div>
-                )}
+                <div className="node-item__name">{n.name}</div>
+                <button className="node-item__icon-btn" title="Edit"
+                  onClick={(e) => openEdit(e, n)}>✎</button>
                 <button className="node-item__delete" title="Delete"
                   onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
               </div>
@@ -278,6 +267,35 @@ export default function Sidebar({
           <code>OLLAMA_ORIGINS=* ollama serve</code>
         </p>
       </section>
+
+      {/* ── Edit tag modal ────────────────────────── */}
+      {editingNode && (
+        <div className="edit-modal-overlay" onClick={closeEdit}>
+          <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="edit-modal__title">Edit Tag</h3>
+            <label className="sidebar__label">Name</label>
+            <input
+              className="sidebar__input"
+              value={editName}
+              autoFocus
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') closeEdit(); }}
+            />
+            <label className="sidebar__label" style={{ marginTop: 10 }}>Description</label>
+            <textarea
+              className="sidebar__input sidebar__textarea"
+              value={editDesc}
+              rows={3}
+              onChange={(e) => setEditDesc(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') closeEdit(); }}
+            />
+            <div className="edit-modal__actions">
+              <button className="btn btn--primary" onClick={saveEdit} disabled={!editName.trim()}>Save</button>
+              <button className="btn btn--ghost" onClick={closeEdit}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </aside>
   );

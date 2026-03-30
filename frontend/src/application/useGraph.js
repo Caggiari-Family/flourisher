@@ -44,12 +44,12 @@ export function useGraph(token, getSuggestions, getFlourish) {
     }
   }, [api, reload, notify]);
 
-  const updateTag = useCallback(async (id, name) => {
+  const updateTag = useCallback(async (id, name, description) => {
     try {
-      await api.updateTag(id, { name });
+      await api.updateTag(id, { name, description });
       await reload();
     } catch {
-      notify('Failed to rename tag', 'error');
+      notify('Failed to update tag', 'error');
     }
   }, [api, reload, notify]);
 
