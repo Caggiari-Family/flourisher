@@ -187,7 +187,12 @@ export default function Sidebar({
             <li
               key={n.id}
               className={`node-item ${selectedIds.has(n.id) ? 'node-item--selected' : ''}`}
-              onClick={() => onToggleSelect(n.id)}
+              onClick={(e) => { if (e.detail < 2) onToggleSelect(n.id); }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setEditingId(n.id);
+                setEditingName(n.name);
+              }}
             >
               <div className="node-item__header">
                 {editingId === n.id ? (
@@ -213,15 +218,7 @@ export default function Sidebar({
                     onClick={(e) => e.stopPropagation()}
                   />
                 ) : (
-                  <div
-                    className="node-item__name"
-                    title="Double-click to rename"
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      setEditingId(n.id);
-                      setEditingName(n.name);
-                    }}
-                  >{n.name}</div>
+                  <div className="node-item__name">{n.name}</div>
                 )}
                 <button className="node-item__delete" title="Delete"
                   onClick={(e) => { e.stopPropagation(); onRemoveTag(n.id); }}>×</button>
