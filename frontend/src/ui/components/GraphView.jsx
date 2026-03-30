@@ -43,10 +43,18 @@ export default function GraphView({
       const isSuggested = node.suggested;
       const fontSize = Math.max(9, FONT_BASE / globalScale);
 
-      // Glow for selected nodes
+      const statusColors = {
+        thinking:       { fill: '#1e1040', stroke: '#8b5cf6' },
+        pending:        { fill: '#2a1800', stroke: '#f59e0b' },
+        done:           { fill: '#0f2a1a', stroke: '#10b981' },
+        not_interested: { fill: '#2a0a0a', stroke: '#ef4444' },
+      };
+      const sc = statusColors[node.status] ?? statusColors.thinking;
+
+      // Glow for selected nodes using status color
       if (isSelected) {
-        ctx.shadowColor = '#fbbf24';
-        ctx.shadowBlur = 18 / globalScale;
+        ctx.shadowColor = sc.stroke;
+        ctx.shadowBlur = 28 / globalScale;
       }
 
       ctx.beginPath();
@@ -56,24 +64,13 @@ export default function GraphView({
         ctx.fillStyle = '#1c1f30';
         ctx.strokeStyle = '#6b7280';
         ctx.setLineDash([5 / globalScale, 3 / globalScale]);
-      } else if (isSelected) {
-        ctx.fillStyle = '#3b2200';
-        ctx.strokeStyle = '#fbbf24';
-        ctx.setLineDash([]);
       } else {
-        const statusColors = {
-          thinking:       { fill: '#1e1040', stroke: '#8b5cf6' },
-          pending:        { fill: '#2a1800', stroke: '#f59e0b' },
-          done:           { fill: '#0f2a1a', stroke: '#10b981' },
-          not_interested: { fill: '#2a0a0a', stroke: '#ef4444' },
-        };
-        const statusColor = statusColors[node.status] ?? statusColors.thinking;
-        ctx.fillStyle = statusColor.fill;
-        ctx.strokeStyle = statusColor.stroke;
+        ctx.fillStyle = sc.fill;
+        ctx.strokeStyle = sc.stroke;
         ctx.setLineDash([]);
       }
 
-      ctx.lineWidth = 2 / globalScale;
+      ctx.lineWidth = (isSelected ? 3.5 : 2) / globalScale;
       ctx.fill();
       ctx.stroke();
       ctx.setLineDash([]);
@@ -83,7 +80,7 @@ export default function GraphView({
       ctx.font = `${isSuggested ? 'italic ' : ''}${fontSize}px Sans-Serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = isSuggested ? '#9ca3af' : isSelected ? '#fde68a' : '#e2e8f0';
+      ctx.fillStyle = isSuggested ? '#9ca3af' : '#e2e8f0';
 
       // Truncate long names
       const maxWidth = NODE_R * 1.8;
