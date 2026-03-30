@@ -2,15 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import './Sidebar.css';
 
 const STATUS_OPTIONS = [
-  { value: '', label: '—' },
-  { value: 'done', label: 'Done' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'thinking',      label: 'Thinking' },
+  { value: 'pending',       label: 'Pending' },
+  { value: 'done',          label: 'Done' },
   { value: 'not_interested', label: 'Not interested' },
 ];
 
 const STATUS_COLOR = {
-  done: '#10b981',
-  pending: '#f59e0b',
+  thinking:      '#8b5cf6',
+  pending:       '#f59e0b',
+  done:          '#10b981',
   not_interested: '#ef4444',
 };
 

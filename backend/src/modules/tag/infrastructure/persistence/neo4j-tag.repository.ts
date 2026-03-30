@@ -55,7 +55,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
     try {
       const id = uuidv4();
       const result = await session.run(
-        `CREATE (n:Tag {id: $id, name: $name, description: $description, suggested: $suggested})
+        `CREATE (n:Tag {id: $id, name: $name, description: $description, suggested: $suggested, status: 'thinking'})
          RETURN n`,
         { id, ...input },
       );
@@ -115,7 +115,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
       const label = input.label ?? '';
       const result = await session.run(
         `MATCH (a:Tag {id: $sourceId}), (b:Tag {id: $targetId})
-         CREATE (a)-[r:RELATED_TO {id: $id, label: $label, status: ''}]->(b)
+         CREATE (a)-[r:RELATED_TO {id: $id, label: $label, status: 'thinking'}]->(b)
          RETURN r.id AS id, a.id AS source, b.id AS target, r.label AS label, r.status AS status`,
         { sourceId: input.sourceId, targetId: input.targetId, id, label },
       );
@@ -161,7 +161,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
   // ── Mappers ───────────────────────────────────────────────────────────────
 
   private toTag(p: Record<string, any>): Tag {
-    return new Tag(p.id, p.name, p.description ?? '', p.suggested === true, p.status ?? '');
+    return new Tag(p.id, p.name, p.description ?? '', p.suggested === true, p.status || 'thinking');
   }
 
   private toEdge(r: any): Edge {
@@ -170,7 +170,7 @@ export class Neo4jTagRepository implements TagRepositoryPort {
       source: r.get('source'),
       target: r.get('target'),
       label: r.get('label') ?? '',
-      status: r.get('status') ?? '',
+      status: r.get('status') || 'thinking',
     };
   }
 }
