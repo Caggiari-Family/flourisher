@@ -317,7 +317,6 @@ export default function Sidebar({
               </ul>
             );
           })()}
-          </ul>
         </section>
       )}
 
