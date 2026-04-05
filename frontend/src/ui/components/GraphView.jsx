@@ -2,8 +2,12 @@ import { useRef, useCallback, useMemo, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
-const NODE_R = 36;
-const FONT_BASE = 13;
+const NODE_R_BASE = 36;
+const NODE_R_MAX  = 72;
+const FONT_BASE   = 13;
+
+const nodeRadius = (degree) =>
+  Math.min(NODE_R_BASE + Math.log1p(degree) * 14, NODE_R_MAX);
 
 /**
  * Renders the force-directed graph.
@@ -29,10 +33,23 @@ export default function GraphView({
   // react-force-graph mutates node objects in-place (adds x/y/vx/vy).
   // We pass it a stable shape derived from graphData so React state stays clean.
   const fgData = useMemo(
-    () => ({
-      nodes: graphData.nodes.map((n) => ({ ...n })),
-      links: graphData.edges.map((e) => ({ source: e.source, target: e.target, status: e.status })),
-    }),
+    () => {
+      // Degree map: count edges per node id
+      const degree = {};
+      for (const e of graphData.edges) {
+        degree[e.source] = (degree[e.source] ?? 0) + 1;
+        degree[e.target] = (degree[e.target] ?? 0) + 1;
+      }
+      // node.val drives react-force-graph's hit-detection radius (it uses sqrt(val) * nodeRelSize)
+      // Setting nodeRelSize=1 and val=r² makes the clickable area match the drawn circle.
+      return {
+        nodes: graphData.nodes.map((n) => {
+          const r = nodeRadius(degree[n.id] ?? 0);
+          return { ...n, _r: r, val: r * r };
+        }),
+        links: graphData.edges.map((e) => ({ source: e.source, target: e.target, status: e.status })),
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(graphData)],
   );
@@ -57,8 +74,10 @@ export default function GraphView({
         ctx.shadowBlur = 28 / globalScale;
       }
 
+      const r = node._r ?? NODE_R_BASE;
+
       ctx.beginPath();
-      ctx.arc(node.x, node.y, NODE_R, 0, 2 * Math.PI);
+      ctx.arc(node.x, node.y, r, 0, 2 * Math.PI);
 
       if (isSuggested) {
         ctx.fillStyle = '#1c1f30';
@@ -83,7 +102,7 @@ export default function GraphView({
       ctx.fillStyle = isSuggested ? '#9ca3af' : '#e2e8f0';
 
       // Truncate long names
-      const maxWidth = NODE_R * 1.8;
+      const maxWidth = r * 1.8;
       let label = node.name;
       while (ctx.measureText(label).width > maxWidth && label.length > 3) {
         label = label.slice(0, -2) + '…';
@@ -95,7 +114,7 @@ export default function GraphView({
         const bSize = Math.max(8, 11 / globalScale);
         ctx.font = `bold ${bSize}px Sans-Serif`;
         ctx.fillStyle = '#6b7280';
-        ctx.fillText('?', node.x + NODE_R * 0.65, node.y - NODE_R * 0.65);
+        ctx.fillText('?', node.x + r * 0.65, node.y - r * 0.65);
       }
     },
     [selectedIds],
@@ -129,7 +148,7 @@ export default function GraphView({
         graphData={fgData}
         nodeCanvasObject={paintNode}
         nodeCanvasObjectMode={() => 'replace'}
-        nodeRelSize={NODE_R}
+        nodeRelSize={1}
         nodeLabel={nodeLabel}
         onNodeClick={handleNodeClick}
         onNodeRightClick={handleNodeRightClick}
