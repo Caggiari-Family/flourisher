@@ -1,0 +1,36 @@
+import { createApiClient } from './client';
+
+/**
+ * Builds the tag/edge API adapter bound to the given JWT token.
+ *
+ * @param {string} token  JWT access token
+ */
+export function createTagApi(token) {
+  const client = createApiClient(token);
+
+  return {
+    // ── Graph ────────────────────────────────────────────────────────────
+    fetchGraph: () => client.get('/graph'),
+
+    // ── Nodes ────────────────────────────────────────────────────────────
+    /** @param {boolean} [suggested=false]  Pass true for AI suggestion nodes */
+    createTag: (name, description, suggested = false, status) =>
+      client.post('/nodes', { name, description, suggested, ...(status ? { status } : {}) }),
+
+    updateTag: (id, data) => client.put(`/nodes/${id}`, data),
+
+    deleteTag: (id) => client.delete(`/nodes/${id}`),
+
+    acceptSuggestion: (id) => client.put(`/nodes/${id}/accept`, {}),
+
+    rejectSuggestion: (id) => client.delete(`/nodes/${id}/reject`),
+
+    // ── Edges ────────────────────────────────────────────────────────────
+    createEdge: (sourceId, targetId, label = '', status) =>
+      client.post('/edges', { sourceId, targetId, label, ...(status ? { status } : {}) }),
+
+    updateEdge: (id, label, status) => client.put(`/edges/${id}`, { label, status }),
+
+    deleteEdge: (id) => client.delete(`/edges/${id}`),
+  };
+}

@@ -1,0 +1,17 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Local compose overrides (personal, not shared)
+docker-compose.override.local.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo

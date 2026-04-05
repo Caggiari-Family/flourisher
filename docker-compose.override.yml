@@ -1,0 +1,19 @@
+# Development overrides — loaded automatically by `docker compose up`.
+# Replaces the production nginx frontend with Vite's dev server so you get
+# hot module replacement without rebuilding the image.
+#
+# To use the production build instead, run:
+#   docker compose -f docker-compose.yml up --build
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules        # keep container's node_modules isolated
+    ports:
+      - "5173:3000"
+    environment:
+      VITE_API_URL: "http://backend:3001"
