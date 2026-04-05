@@ -49,7 +49,25 @@ export default function GraphView({
           const r = nodeRadius(degree[n.id] ?? 0);
           return { ...n, _r: r, val: r * r };
         }),
-        links: graphData.edges.map((e) => ({ source: e.source, target: e.target, status: e.status })),
+        links: (() => {
+          // Track how many edges exist per unordered pair to assign curvature.
+          // Bidirectional or duplicate edges get opposite curves so they don't overlap.
+          const pairCount = {};
+          const pairIndex = {};
+          for (const e of graphData.edges) {
+            const key = [e.source, e.target].sort().join('||');
+            pairCount[key] = (pairCount[key] ?? 0) + 1;
+          }
+          return graphData.edges.map((e) => {
+            const key = [e.source, e.target].sort().join('||');
+            const total = pairCount[key];
+            pairIndex[key] = (pairIndex[key] ?? 0) + 1;
+            const idx = pairIndex[key]; // 1-based
+            // Spread curves symmetrically around 0: e.g. total=2 → -0.25, +0.25
+            const curvature = total === 1 ? 0 : ((idx - (total + 1) / 2) / total) * 0.6;
+            return { source: e.source, target: e.target, status: e.status, curvature };
+          });
+        })(),
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,20 +172,21 @@ export default function GraphView({
         nodeLabel={nodeLabel}
         onNodeClick={handleNodeClick}
         onNodeRightClick={handleNodeRightClick}
+        linkCurvature="curvature"
         linkColor={(link) => {
-          if (link.status === 'pending') return '#f59e0b';
-          if (link.status === 'done') return '#10b981';
-          if (link.status === 'not_interested') return '#ef4444';
-          return '#8b5cf6'; // thinking or unset
+          if (link.status === 'pending') return 'rgba(245,158,11,0.5)';
+          if (link.status === 'done') return 'rgba(16,185,129,0.5)';
+          if (link.status === 'not_interested') return 'rgba(239,68,68,0.5)';
+          return 'rgba(139,92,246,0.5)';
         }}
-        linkWidth={2}
+        linkWidth={1.5}
         linkDirectionalArrowLength={20}
         linkDirectionalArrowRelPos={1}
         linkDirectionalArrowColor={(link) => {
-          if (link.status === 'pending') return '#f59e0b';
-          if (link.status === 'done') return '#10b981';
-          if (link.status === 'not_interested') return '#ef4444';
-          return '#8b5cf6'; // thinking or unset
+          if (link.status === 'pending') return 'rgba(245,158,11,0.8)';
+          if (link.status === 'done') return 'rgba(16,185,129,0.8)';
+          if (link.status === 'not_interested') return 'rgba(239,68,68,0.8)';
+          return 'rgba(139,92,246,0.8)';
         }}
         backgroundColor="#0f1117"
         cooldownTicks={300}
