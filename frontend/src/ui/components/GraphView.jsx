@@ -3,11 +3,11 @@ import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
 const NODE_R_BASE = 36;
-const NODE_R_MAX  = 72;
+const NODE_R_MAX  = 144;
 const FONT_BASE   = 13;
 
 const nodeRadius = (degree) =>
-  Math.min(NODE_R_BASE + Math.log1p(degree) * 14, NODE_R_MAX);
+  Math.min(NODE_R_BASE + Math.log1p(degree) * 28, NODE_R_MAX);
 
 /**
  * Renders the force-directed graph.
