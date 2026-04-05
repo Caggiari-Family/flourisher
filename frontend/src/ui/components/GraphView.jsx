@@ -2,7 +2,7 @@ import { useRef, useCallback, useMemo, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import './GraphView.css';
 
-const NODE_R = 24;
+const NODE_R = 36;
 const FONT_BASE = 13;
 
 /**
