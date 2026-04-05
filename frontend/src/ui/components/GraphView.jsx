@@ -27,8 +27,8 @@ export default function GraphView({
   useEffect(() => {
     const fg = fgRef.current;
     if (!fg) return;
-    fg.d3Force('charge').strength(-900);
-    fg.d3Force('link').distance(320);
+    fg.d3Force('charge').strength(-1800);
+    fg.d3Force('link').distance(500);
     fg.d3Force('collision', forceCollide((node) => (node._r ?? NODE_R_BASE) + 8));
   }, []);
 
