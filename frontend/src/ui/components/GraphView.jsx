@@ -1,5 +1,6 @@
 import { useRef, useCallback, useMemo, useEffect } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
+import { forceCollide } from 'd3-force';
 import './GraphView.css';
 
 const NODE_R_BASE = 36;
@@ -28,6 +29,7 @@ export default function GraphView({
     if (!fg) return;
     fg.d3Force('charge').strength(-900);
     fg.d3Force('link').distance(320);
+    fg.d3Force('collision', forceCollide((node) => (node._r ?? NODE_R_BASE) + 8));
   }, []);
 
   // react-force-graph mutates node objects in-place (adds x/y/vx/vy).
