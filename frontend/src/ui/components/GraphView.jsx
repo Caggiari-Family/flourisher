@@ -158,8 +158,8 @@ export default function GraphView({
           if (link.status === 'not_interested') return '#ef4444';
           return '#8b5cf6'; // thinking or unset
         }}
-        linkWidth={1.5}
-        linkDirectionalArrowLength={8}
+        linkWidth={2}
+        linkDirectionalArrowLength={20}
         linkDirectionalArrowRelPos={1}
         linkDirectionalArrowColor={(link) => {
           if (link.status === 'pending') return '#f59e0b';
