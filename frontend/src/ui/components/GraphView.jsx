@@ -26,8 +26,8 @@ export default function GraphView({
   useEffect(() => {
     const fg = fgRef.current;
     if (!fg) return;
-    fg.d3Force('charge').strength(-600);
-    fg.d3Force('link').distance(180);
+    fg.d3Force('charge').strength(-900);
+    fg.d3Force('link').distance(320);
   }, []);
 
   // react-force-graph mutates node objects in-place (adds x/y/vx/vy).
